@@ -14,7 +14,7 @@ import {
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/languages', icon: BookOpen, label: 'Lessons' },
+  { href: '/lessons', icon: BookOpen, label: 'Lessons' },
   { href: '/upload', icon: Upload, label: 'Upload Code' },
   { href: '/blogs', icon: BookMarked, label: 'Blog' },
   { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },

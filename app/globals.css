@@ -95,3 +95,8 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+.hljs {
+  background: #0f172a;
+  color: #e2e8f0;
+}

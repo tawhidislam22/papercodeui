@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Eye, Loader as Loader2, Plus, X } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { api, getDemoUser } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,35 +45,37 @@ export default function NewBlogPage() {
     setSaving(true);
     setError('');
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push('/auth'); return; }
+    const demoUser = getDemoUser();
+    if (!demoUser) { router.push('/auth'); return; }
 
     const slug = slugify(title) + '-' + Date.now();
     const readingTime = Math.max(1, Math.ceil(content.split(' ').length / 200));
 
-    const { error: err } = await supabase.from('blogs').insert({
-      author_id: user.id,
-      title: title.trim(),
-      slug,
-      excerpt: excerpt.trim() || content.trim().slice(0, 200),
-      content: content.trim(),
-      tags,
-      is_published: published,
-      reading_time: readingTime,
-    });
-
-    if (err) { setError(err.message); setSaving(false); return; }
-
-    if (published) {
-      await supabase.from('xp_events').insert({
-        user_id: user.id,
-        event_type: 'publish_blog',
-        xp_amount: 25,
-        description: 'Published a blog post',
+    try {
+      await api.blogs.create({
+        title: title.trim(),
+        slug,
+        excerpt: excerpt.trim() || content.trim().slice(0, 200),
+        content: content.trim(),
+        tags,
+        isPublished: published,
+        readingTime,
       });
-    }
 
-    router.push('/blogs');
+      if (published) {
+        await api.xp.award({
+          eventType: 'publish_blog',
+          xpAmount: 25,
+          description: 'Published a blog post',
+        });
+      }
+
+      router.push('/blogs');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to publish');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

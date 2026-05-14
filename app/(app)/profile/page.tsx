@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap, Flame, Trophy, CreditCard as Edit2, Save, X, Camera, BookOpen, Upload, Star, TrendingUp, Calendar } from 'lucide-react';
+import { Zap, Flame, Trophy, CreditCard as Edit2, Save, X, Upload, TrendingUp, Calendar } from 'lucide-react';
 import { api, getDemoUser, type Profile, getLevelFromXP, getXPProgress } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { authRouter } from './auth/auth.routes.js';
 import { usersRouter } from './users/users.routes.js';
+import { languagesRouter } from './languages/languages.routes.js';
 import { lessonsRouter } from './lessons/lessons.routes.js';
+import { chaptersRouter } from './chapters/chapters.routes.js';
+import { progressRouter } from './progress/progress.routes.js';
+import { executionsRouter } from './executions/executions.routes.js';
 import { challengesRouter } from './challenges/challenges.routes.js';
 import { submissionsRouter } from './submissions/submissions.routes.js';
 import { blogsRouter } from './blogs/blogs.routes.js';
@@ -12,7 +16,11 @@ export const apiRouter = Router();
 
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', usersRouter);
+apiRouter.use('/languages', languagesRouter);
 apiRouter.use('/lessons', lessonsRouter);
+apiRouter.use('/chapters', chaptersRouter);
+apiRouter.use('/progress', progressRouter);
+apiRouter.use('/executions', executionsRouter);
 apiRouter.use('/challenges', challengesRouter);
 apiRouter.use('/submissions', submissionsRouter);
 apiRouter.use('/blogs', blogsRouter);

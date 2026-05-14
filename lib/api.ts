@@ -24,19 +24,129 @@ export type Language = {
 	createdAt?: string;
 };
 
-export type Lesson = {
+export type LessonSummary = {
 	id: string;
 	languageId: string;
 	title: string;
 	slug: string;
 	description: string;
-	content: string;
 	difficulty: string;
 	xpReward: number;
+	estimatedMinutes: number;
 	sortOrder: number;
 	isPublished: boolean;
 	createdAt?: string;
 	updatedAt?: string;
+	chaptersCount: number;
+	completedChapters: number;
+	progressPercent: number;
+	totalEstimatedMinutes: number;
+};
+
+export type LessonChapter = {
+	id: string;
+	lessonId: string;
+	title: string;
+	description: string;
+	sortOrder: number;
+	estimatedMinutes: number;
+	xpReward: number;
+	isPublished: boolean;
+	blocksCount: number;
+	progress: {
+		currentBlockId?: string | null;
+		completedBlockIds: string[];
+		isCompleted: boolean;
+	} | null;
+};
+
+export type LessonDetail = {
+	id: string;
+	languageId: string;
+	title: string;
+	slug: string;
+	description: string;
+	difficulty: string;
+	xpReward: number;
+	estimatedMinutes: number;
+	sortOrder: number;
+	isPublished: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+	chapters: LessonChapter[];
+};
+
+export type LessonBlock = {
+	id: string;
+	chapterId: string;
+	type: 'THEORY' | 'MCQ' | 'CODING';
+	sortOrder: number;
+	title: string;
+	content: string;
+	codeLanguage: string;
+	mcq?: MCQQuestion | null;
+	coding?: CodingChallenge | null;
+};
+
+export type MCQQuestion = {
+	id: string;
+	blockId: string;
+	question: string;
+	options: string[];
+	correctIndex: number;
+	explanation: string;
+};
+
+export type CodingChallenge = {
+	id: string;
+	blockId: string;
+	question: string;
+	starterCode: string;
+	expectedOutput: string;
+	language: string;
+	hints: string[];
+};
+
+export type ChapterDetail = {
+	id: string;
+	lessonId: string;
+	title: string;
+	description: string;
+	sortOrder: number;
+	estimatedMinutes: number;
+	xpReward: number;
+	isPublished: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+	lesson: {
+		id: string;
+		title: string;
+		slug: string;
+		difficulty: string;
+		xpReward: number;
+	};
+	progress?: {
+		currentBlockId?: string | null;
+		completedBlockIds: string[];
+		isCompleted: boolean;
+	} | null;
+	blocks: LessonBlock[];
+};
+
+export type CodeExecutionResult = {
+	execution: {
+		id: string;
+		status: string;
+		stdout: string;
+		stderr: string;
+		compileOutput: string;
+	};
+	review: {
+		id: string;
+		verdict: string;
+		feedback: string;
+		suggestions: string;
+	};
 };
 
 export type Blog = {
@@ -216,8 +326,48 @@ export const api = {
 		},
 	},
 	lessons: {
-		listByLanguageId(languageId: string) {
-			return apiFetch<Lesson[]>(`/lessons?languageId=${encodeURIComponent(languageId)}`);
+		listByLanguageId(languageId?: string) {
+			const query = languageId ? `?languageId=${encodeURIComponent(languageId)}` : '';
+			return apiFetch<LessonSummary[]>(`/lessons${query}`);
+		},
+		getBySlug(slug: string) {
+			return apiFetch<LessonDetail>(`/lessons/slug/${encodeURIComponent(slug)}`);
+		},
+	},
+	chapters: {
+		getById(id: string) {
+			return apiFetch<ChapterDetail>(`/chapters/${encodeURIComponent(id)}`);
+		},
+	},
+	progress: {
+		getLesson(lessonId: string) {
+			return apiFetch<unknown[]>(`/progress/lesson/${encodeURIComponent(lessonId)}`);
+		},
+		completeBlock(chapterId: string, data: { lessonId: string; blockId: string }) {
+			return apiFetch(`/progress/chapters/${encodeURIComponent(chapterId)}/block`, {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
+		completeChapter(chapterId: string, data: { lessonId: string }) {
+			return apiFetch(`/progress/chapters/${encodeURIComponent(chapterId)}/complete`, {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
+	},
+	executions: {
+		run(data: { chapterId?: string; language: string; sourceCode: string; stdin?: string }) {
+			return apiFetch<CodeExecutionResult>('/executions/run', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
+		extractCode(data: { base64Image: string; languageHint?: string }) {
+			return apiFetch<{ extractedCode: string; confidence: number }>('/executions/ocr', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
 		},
 	},
 	blogs: {

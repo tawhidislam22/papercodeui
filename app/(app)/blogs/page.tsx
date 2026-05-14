@@ -3,16 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Search, Plus, BookMarked, Heart, MessageCircle, Clock,
-  Bookmark, TrendingUp, Filter, Eye
-} from 'lucide-react';
-import { supabase, type Blog } from '@/lib/supabase';
+import { Search, Plus, BookMarked, Heart, Clock, Eye } from 'lucide-react';
+import { api, getDemoUser, type Blog, type Profile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
-type BlogWithAuthor = Blog & { profiles: { username: string; display_name: string; avatar_url: string } | null };
+type BlogWithAuthor = Blog & { author?: Profile | null };
 
 const TAGS = ['All', 'JavaScript', 'Python', 'C', 'C++', 'Java', 'TypeScript', 'Learning', 'Tips', 'Projects'];
 
@@ -25,19 +22,20 @@ export default function BlogsPage() {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUserId(data.user.id);
-    });
+    const demoUser = getDemoUser();
+    if (demoUser) setUserId(demoUser.id);
 
-    supabase
-      .from('blogs')
-      .select('*, profiles(username, display_name, avatar_url)')
-      .eq('is_published', true)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        if (data) setBlogs(data as BlogWithAuthor[]);
+    Promise.all([api.blogs.list(), api.users.list()])
+      .then(([blogData, users]) => {
+        const authorMap = new Map(users.map((u) => [u.id, u]));
+        const withAuthors = blogData.map((b) => ({
+          ...b,
+          author: authorMap.get(b.authorId) ?? null,
+        }));
+        setBlogs(withAuthors);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const filtered = blogs.filter((b) => {
@@ -58,72 +56,72 @@ export default function BlogsPage() {
       title: 'Why Writing Code by Hand Actually Works',
       excerpt: 'Research shows that handwriting activates deeper cognitive processing. Here is the science behind Paper Code and why it helps you learn faster.',
       tags: ['Learning'],
-      likes_count: 42,
-      comments_count: 8,
-      reading_time: 5,
-      created_at: new Date().toISOString(),
+      likesCount: 42,
+      commentsCount: 8,
+      readingTime: 5,
+      createdAt: new Date().toISOString(),
       views: 320,
-      profiles: { username: 'alexj', display_name: 'Alex Johnson', avatar_url: '' },
+      author: { id: 'p1a', username: 'alexj', displayName: 'Alex Johnson', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
     },
     {
       id: 'p2',
       title: 'Python Lists vs Tuples: When to Use Which',
       excerpt: 'A comprehensive guide to understanding the difference between Python lists and tuples, with practical examples and performance benchmarks.',
       tags: ['Python'],
-      likes_count: 28,
-      comments_count: 5,
-      reading_time: 7,
-      created_at: new Date(Date.now() - 86400000).toISOString(),
+      likesCount: 28,
+      commentsCount: 5,
+      readingTime: 7,
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
       views: 211,
-      profiles: { username: 'pythonjunkie', display_name: 'Sam Chen', avatar_url: '' },
+      author: { id: 'p2a', username: 'pythonjunkie', displayName: 'Sam Chen', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
     },
     {
       id: 'p3',
       title: 'Understanding Pointers in C — The Visual Way',
       excerpt: 'Pointers confuse everyone at first. This guide uses memory diagrams and handwritten examples to make them click forever.',
       tags: ['C'],
-      likes_count: 67,
-      comments_count: 14,
-      reading_time: 12,
-      created_at: new Date(Date.now() - 172800000).toISOString(),
+      likesCount: 67,
+      commentsCount: 14,
+      readingTime: 12,
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
       views: 589,
-      profiles: { username: 'clowlevel', display_name: 'Mike P.', avatar_url: '' },
+      author: { id: 'p3a', username: 'clowlevel', displayName: 'Mike P.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
     },
     {
       id: 'p4',
       title: 'My First 30 Days Learning JavaScript',
       excerpt: 'I documented everything I learned in my first month with JavaScript. From variables to closures — my honest experience.',
       tags: ['JavaScript', 'Learning'],
-      likes_count: 35,
-      comments_count: 22,
-      reading_time: 10,
-      created_at: new Date(Date.now() - 259200000).toISOString(),
+      likesCount: 35,
+      commentsCount: 22,
+      readingTime: 10,
+      createdAt: new Date(Date.now() - 259200000).toISOString(),
       views: 445,
-      profiles: { username: 'newdev99', display_name: 'Jordan K.', avatar_url: '' },
+      author: { id: 'p4a', username: 'newdev99', displayName: 'Jordan K.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
     },
     {
       id: 'p5',
       title: 'Building a Calculator in C++: Step by Step',
       excerpt: 'A hands-on project tutorial for C++ beginners. We build a command-line calculator from scratch, explaining every concept.',
       tags: ['C++', 'Projects'],
-      likes_count: 19,
-      comments_count: 7,
-      reading_time: 15,
-      created_at: new Date(Date.now() - 345600000).toISOString(),
+      likesCount: 19,
+      commentsCount: 7,
+      readingTime: 15,
+      createdAt: new Date(Date.now() - 345600000).toISOString(),
       views: 167,
-      profiles: { username: 'cppdev', display_name: 'Lisa T.', avatar_url: '' },
+      author: { id: 'p5a', username: 'cppdev', displayName: 'Lisa T.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
     },
     {
       id: 'p6',
       title: '10 JavaScript Tips That Will Level Up Your Code',
       excerpt: 'From destructuring to optional chaining — these 10 modern JavaScript patterns will make your code cleaner and more expressive.',
       tags: ['JavaScript', 'Tips'],
-      likes_count: 93,
-      comments_count: 31,
-      reading_time: 8,
-      created_at: new Date(Date.now() - 432000000).toISOString(),
+      likesCount: 93,
+      commentsCount: 31,
+      readingTime: 8,
+      createdAt: new Date(Date.now() - 432000000).toISOString(),
       views: 1024,
-      profiles: { username: 'jshero', display_name: 'Ryan B.', avatar_url: '' },
+      author: { id: 'p6a', username: 'jshero', displayName: 'Ryan B.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
     },
   ];
 
@@ -202,16 +200,16 @@ export default function BlogsPage() {
                 <p className="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-4">{post.excerpt}</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {(post.profiles?.display_name || post.profiles?.username || '?').charAt(0).toUpperCase()}
+                    {(post.author?.displayName || post.author?.username || '?').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-gray-700 truncate">{post.profiles?.display_name || post.profiles?.username}</p>
-                    <p className="text-xs text-gray-400">{post.created_at ? formatDate(post.created_at) : ''}</p>
+                    <p className="text-xs font-semibold text-gray-700 truncate">{post.author?.displayName || post.author?.username || 'Anonymous'}</p>
+                    <p className="text-xs text-gray-400">{post.createdAt ? formatDate(post.createdAt) : ''}</p>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-400 shrink-0">
                     <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.views}</span>
-                    <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{post.likes_count}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.reading_time}m</span>
+                    <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{post.likesCount}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.readingTime}m</span>
                   </div>
                 </div>
               </article>

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, Heart, MessageCircle, Bookmark, Clock, Eye, Share2, Tag } from 'lucide-react';
-import { supabase, type Blog } from '@/lib/supabase';
+import { ArrowLeft, Heart, MessageCircle, Bookmark, Clock, Eye, Share2 } from 'lucide-react';
+import { api, type Blog, type Profile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -13,10 +13,10 @@ const PLACEHOLDER_BLOGS: Record<string, Partial<Blog> & { author: string; author
   p1: {
     title: 'Why Writing Code by Hand Actually Works',
     tags: ['Learning'],
-    likes_count: 42,
-    comments_count: 8,
-    reading_time: 5,
-    created_at: new Date().toISOString(),
+    likesCount: 42,
+    commentsCount: 8,
+    readingTime: 5,
+    createdAt: new Date().toISOString(),
     views: 320,
     author: 'Alex Johnson',
     authorInitial: 'A',
@@ -60,10 +60,10 @@ Try it yourself. Pick a simple challenge, write it on paper, and upload it. You 
   p2: {
     title: 'Python Lists vs Tuples: When to Use Which',
     tags: ['Python'],
-    likes_count: 28,
-    comments_count: 5,
-    reading_time: 7,
-    created_at: new Date(Date.now() - 86400000).toISOString(),
+    likesCount: 28,
+    commentsCount: 5,
+    readingTime: 7,
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
     views: 211,
     author: 'Sam Chen',
     authorInitial: 'S',
@@ -120,7 +120,7 @@ Tuples are slightly faster to iterate and use less memory. For large datasets, t
 
 export default function BlogPostPage() {
   const { id } = useParams<{ id: string }>();
-  const [blog, setBlog] = useState<(Partial<Blog> & { author?: string; authorInitial?: string; content?: string }) | null>(null);
+  const [blog, setBlog] = useState<(Partial<Blog> & { author?: string; authorInitial?: string; content?: string; authorProfile?: Profile | null }) | null>(null);
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -133,10 +133,13 @@ export default function BlogPostPage() {
       return;
     }
 
-    supabase.from('blogs').select('*').eq('id', id).maybeSingle().then(({ data }) => {
-      if (data) setBlog(data);
-      setLoading(false);
-    });
+    api.blogs.getById(id)
+      .then(async (data) => {
+        const authorProfile = data.authorId ? await api.users.getById(data.authorId).catch(() => null) : null;
+        setBlog({ ...data, authorProfile });
+      })
+      .catch(() => null)
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -184,17 +187,25 @@ export default function BlogPostPage() {
         <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
-              {(blog as { authorInitial?: string }).authorInitial || '?'}
+              {blog.authorProfile?.displayName?.charAt(0).toUpperCase()
+                || blog.authorProfile?.username?.charAt(0).toUpperCase()
+                || (blog as { authorInitial?: string }).authorInitial
+                || '?'}
             </div>
             <div>
-              <p className="font-semibold text-sm text-gray-900">{(blog as { author?: string }).author || 'Anonymous'}</p>
+              <p className="font-semibold text-sm text-gray-900">
+                {blog.authorProfile?.displayName
+                  || blog.authorProfile?.username
+                  || (blog as { author?: string }).author
+                  || 'Anonymous'}
+              </p>
               <p className="text-xs text-gray-400">
-                {blog.created_at ? new Date(blog.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}
+                {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 ml-auto text-sm text-gray-400">
-            <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{blog.reading_time} min</span>
+            <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{blog.readingTime} min</span>
             <span className="flex items-center gap-1"><Eye className="w-4 h-4" />{blog.views}</span>
           </div>
         </div>
@@ -226,11 +237,11 @@ export default function BlogPostPage() {
             className={`gap-2 ${liked ? 'border-red-200 bg-red-50 text-red-600' : ''}`}
           >
             <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
-            {(blog.likes_count ?? 0) + (liked ? 1 : 0)}
+            {(blog.likesCount ?? 0) + (liked ? 1 : 0)}
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <MessageCircle className="w-4 h-4" />
-            {blog.comments_count ?? 0}
+            {blog.commentsCount ?? 0}
           </Button>
           <Button
             variant="outline"

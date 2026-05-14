@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Camera, Loader as Loader2, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Code as Code2, Sparkles, Eye, RotateCcw, ArrowRight, Image as ImageIcon } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Upload, Camera, Loader as Loader2, CircleCheck as CheckCircle2, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { api, getDemoUser } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -39,6 +40,7 @@ export default function UploadPage() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [language, setLanguage] = useState('');
   const [processingStep, setProcessingStep] = useState(0);
+  const [saveError, setSaveError] = useState('');
 
   // Simulated results (in production, this comes from AI pipeline)
   const [result, setResult] = useState({
@@ -84,29 +86,30 @@ export default function UploadPage() {
   }
 
   async function saveSubmission() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push('/auth'); return; }
+    const demoUser = getDemoUser();
+    if (!demoUser) { router.push('/auth'); return; }
+    setSaveError('');
 
-    await supabase.from('submissions').insert({
-      user_id: user.id,
-      extracted_code: result.extractedCode,
-      corrected_code: result.correctedCode,
-      ai_feedback: result.aiFeedback,
-      ai_explanation: result.aiExplanation,
-      status: 'completed',
-      score: 85,
-    });
+    try {
+      await api.submissions.create({
+        extractedCode: result.extractedCode,
+        correctedCode: result.correctedCode,
+        aiFeedback: result.aiFeedback,
+        aiExplanation: result.aiExplanation,
+        status: 'COMPLETED',
+        score: 85,
+      });
 
-    // Award XP
-    await supabase.from('xp_events').insert({
-      user_id: user.id,
-      event_type: 'upload_code',
-      xp_amount: 30,
-      description: 'Uploaded handwritten code',
-    });
-    await supabase.from('profiles').update({ xp: supabase.rpc ? 0 : 0 }).eq('id', user.id);
+      await api.xp.award({
+        eventType: 'upload_code',
+        xpAmount: 30,
+        description: 'Uploaded handwritten code',
+      });
 
-    setStep('done');
+      setStep('done');
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save submission');
+    }
   }
 
   function reset() {
@@ -144,6 +147,13 @@ export default function UploadPage() {
           </div>
         ))}
       </div>
+
+      {saveError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>Save failed</AlertTitle>
+          <AlertDescription>{saveError}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Step: Upload */}
       {step === 'upload' && (
