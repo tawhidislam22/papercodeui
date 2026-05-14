@@ -14,11 +14,22 @@ app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
+// In-memory cache for demo users — avoids hitting DB on every request
+const demoUserCache = new Map<string, { user: any; ts: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 app.use(async (req, res, next) => {
 	const demoUserId = req.header('x-demo-user-id');
 	if (!demoUserId) return next();
 
 	try {
+		// Check cache first
+		const cached = demoUserCache.get(demoUserId);
+		if (cached && Date.now() - cached.ts < CACHE_TTL) {
+			res.locals.user = cached.user;
+			return next();
+		}
+
 		const usernameHeader = req.header('x-demo-username');
 		const displayNameHeader = req.header('x-demo-display-name');
 		const emailHeader = req.header('x-demo-email');
@@ -53,6 +64,9 @@ app.use(async (req, res, next) => {
 				throw error;
 			}
 		}
+
+		// Cache the user
+		demoUserCache.set(demoUserId, { user, ts: Date.now() });
 
 		res.locals.user = user;
 		return next();
