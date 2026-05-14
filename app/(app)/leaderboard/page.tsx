@@ -2,23 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { Trophy, Flame, Zap, Medal, Crown, TrendingUp } from 'lucide-react';
-import { supabase, type Profile, getLevelFromXP } from '@/lib/supabase';
+import { api, getDemoUser, type Profile, getLevelFromXP } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type Tab = 'xp' | 'streak' | 'level';
 
 const PLACEHOLDER_LEADERS: (Profile & { rank: number })[] = [
-  { id: 'p1', rank: 1, username: 'codewizard', display_name: 'Code Wizard', xp: 4820, streak: 47, longest_streak: 60, level: 7, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p2', rank: 2, username: 'pymaster', display_name: 'Py Master', xp: 3960, streak: 31, longest_streak: 40, level: 7, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p3', rank: 3, username: 'alexjdev', display_name: 'Alex J.', xp: 3210, streak: 22, longest_streak: 30, level: 6, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p4', rank: 4, username: 'coder99', display_name: 'Coder 99', xp: 2890, streak: 15, longest_streak: 20, level: 5, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p5', rank: 5, username: 'builderX', display_name: 'Builder X', xp: 2670, streak: 18, longest_streak: 25, level: 5, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p6', rank: 6, username: 'newdev', display_name: 'New Dev', xp: 2100, streak: 10, longest_streak: 12, level: 4, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p7', rank: 7, username: 'striver', display_name: 'Striver', xp: 1750, streak: 8, longest_streak: 15, level: 4, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p8', rank: 8, username: 'daily_coder', display_name: 'Daily Coder', xp: 1430, streak: 21, longest_streak: 21, level: 4, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p9', rank: 9, username: 'hackerman', display_name: 'Hackerman', xp: 1100, streak: 5, longest_streak: 8, level: 3, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
-  { id: 'p10', rank: 10, username: 'learner1', display_name: 'Learner One', xp: 820, streak: 3, longest_streak: 5, level: 3, avatar_url: '', bio: '', role: 'user', last_active_date: null, created_at: '', updated_at: '' },
+  { id: 'p1', rank: 1, username: 'codewizard', displayName: 'Code Wizard', xp: 4820, streak: 47, longestStreak: 60, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p2', rank: 2, username: 'pymaster', displayName: 'Py Master', xp: 3960, streak: 31, longestStreak: 40, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p3', rank: 3, username: 'alexjdev', displayName: 'Alex J.', xp: 3210, streak: 22, longestStreak: 30, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p4', rank: 4, username: 'coder99', displayName: 'Coder 99', xp: 2890, streak: 15, longestStreak: 20, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p5', rank: 5, username: 'builderX', displayName: 'Builder X', xp: 2670, streak: 18, longestStreak: 25, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p6', rank: 6, username: 'newdev', displayName: 'New Dev', xp: 2100, streak: 10, longestStreak: 12, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p7', rank: 7, username: 'striver', displayName: 'Striver', xp: 1750, streak: 8, longestStreak: 15, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p8', rank: 8, username: 'daily_coder', displayName: 'Daily Coder', xp: 1430, streak: 21, longestStreak: 21, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p9', rank: 9, username: 'hackerman', displayName: 'Hackerman', xp: 1100, streak: 5, longestStreak: 8, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
+  { id: 'p10', rank: 10, username: 'learner1', displayName: 'Learner One', xp: 820, streak: 3, longestStreak: 5, avatarUrl: '', bio: '', role: 'USER', createdAt: '', updatedAt: '' },
 ];
 
 export default function LeaderboardPage() {
@@ -28,17 +28,17 @@ export default function LeaderboardPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setCurrentUserId(data.user.id);
-    });
+    const demoUser = getDemoUser();
+    if (demoUser) setCurrentUserId(demoUser.id);
 
-    supabase.from('profiles').select('*').order('xp', { ascending: false }).limit(50)
-      .then(({ data }) => {
+    api.users.list()
+      .then((data) => {
         if (data && data.length > 0) {
           setLeaders(data.map((p, i) => ({ ...p, rank: i + 1 })));
         }
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const sorted = [...(leaders.length > 0 ? leaders : PLACEHOLDER_LEADERS)].sort((a, b) => {
@@ -76,9 +76,9 @@ export default function LeaderboardPage() {
               <div key={leader.username} className={`flex flex-col items-center gap-2 ${isFirst ? 'mb-0' : 'mb-4'}`}>
                 <div className="relative">
                   <Avatar className={`${isFirst ? 'w-16 h-16' : 'w-12 h-12'} ring-4 ${isFirst ? 'ring-yellow-400' : 'ring-gray-200'}`}>
-                    <AvatarImage src={leader.avatar_url} />
+                    <AvatarImage src={leader.avatarUrl} />
                     <AvatarFallback className="bg-gradient-to-br from-blue-400 to-cyan-400 text-white font-bold">
-                      {(leader.display_name || leader.username).charAt(0).toUpperCase()}
+                      {(leader.displayName || leader.username).charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {isFirst && (
@@ -88,7 +88,7 @@ export default function LeaderboardPage() {
                   )}
                 </div>
                 <p className={`font-bold text-gray-900 ${isFirst ? 'text-base' : 'text-sm'}`}>
-                  {leader.display_name || leader.username}
+                  {leader.displayName || leader.username}
                 </p>
                 <div className={`${heights[i]} ${podiumColors[i]} border rounded-t-xl w-24 flex flex-col items-center justify-end pb-3 gap-1`}>
                   <p className="text-2xl font-black text-gray-700">{leader.rank}</p>
@@ -136,16 +136,16 @@ export default function LeaderboardPage() {
               </div>
 
               <Avatar className="w-10 h-10 shrink-0">
-                <AvatarImage src={leader.avatar_url} />
+                <AvatarImage src={leader.avatarUrl} />
                 <AvatarFallback className="bg-gradient-to-br from-blue-400 to-cyan-400 text-white text-sm font-bold">
-                  {(leader.display_name || leader.username).charAt(0).toUpperCase()}
+                  {(leader.displayName || leader.username).charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-gray-900 truncate">
-                    {leader.display_name || leader.username}
+                    {leader.displayName || leader.username}
                   </p>
                   {isMe && <Badge className="bg-blue-600 text-white border-0 text-xs shrink-0">You</Badge>}
                 </div>

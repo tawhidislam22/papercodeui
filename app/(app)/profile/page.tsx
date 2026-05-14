@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Zap, Flame, Trophy, CreditCard as Edit2, Save, X, Camera, BookOpen, Upload, Star, TrendingUp, Calendar } from 'lucide-react';
-import { supabase, type Profile, getLevelFromXP, getXPProgress } from '@/lib/supabase';
+import { api, getDemoUser, type Profile, getLevelFromXP, getXPProgress } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,12 +21,12 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push('/auth'); return; }
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      const demoUser = getDemoUser();
+      if (!demoUser) { router.push('/auth'); return; }
+      const data = await api.users.getMe();
       if (data) {
         setProfile(data);
-        setForm({ display_name: data.display_name, bio: data.bio, username: data.username });
+        setForm({ display_name: data.displayName, bio: data.bio ?? '', username: data.username });
       }
       setLoading(false);
     }
@@ -36,12 +36,7 @@ export default function ProfilePage() {
   async function save() {
     if (!profile) return;
     setSaving(true);
-    const { data } = await supabase
-      .from('profiles')
-      .update({ display_name: form.display_name, bio: form.bio })
-      .eq('id', profile.id)
-      .select()
-      .maybeSingle();
+    const data = await api.users.updateMe({ displayName: form.display_name, bio: form.bio });
     if (data) setProfile(data);
     setSaving(false);
     setEditing(false);
@@ -86,9 +81,9 @@ export default function ProfilePage() {
           <div className="flex items-end justify-between -mt-10 mb-4">
             <div className="relative">
               <Avatar className="w-20 h-20 ring-4 ring-white shadow-lg">
-                <AvatarImage src={profile.avatar_url} />
+                <AvatarImage src={profile.avatarUrl} />
                 <AvatarFallback className="text-2xl font-extrabold text-white" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
-                  {(profile.display_name || profile.username).charAt(0).toUpperCase()}
+                  {(profile.displayName || profile.username).charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -128,17 +123,17 @@ export default function ProfilePage() {
           ) : (
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl font-extrabold text-gray-900">{profile.display_name || profile.username}</h1>
+                <h1 className="text-2xl font-extrabold text-gray-900">{profile.displayName || profile.username}</h1>
                 <Badge className="bg-blue-50 text-blue-700 border-blue-100 font-semibold">Level {level}</Badge>
-                {profile.role !== 'user' && (
-                  <Badge className="bg-amber-50 text-amber-700 border-amber-100 capitalize">{profile.role}</Badge>
+                {profile.role !== 'USER' && (
+                  <Badge className="bg-amber-50 text-amber-700 border-amber-100 capitalize">{profile.role.toLowerCase()}</Badge>
                 )}
               </div>
               <p className="text-gray-500 text-sm mt-0.5">@{profile.username}</p>
               {profile.bio && <p className="text-gray-700 text-sm mt-3 leading-relaxed">{profile.bio}</p>}
               <p className="text-gray-400 text-xs mt-2 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                Joined {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
               </p>
             </div>
           )}

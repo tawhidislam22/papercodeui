@@ -7,7 +7,7 @@ import { Code as Code2, Eye, EyeOff, ArrowLeft, Loader as Loader2 } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/lib/supabase';
+import { api, ensureDemoUser, setDemoUser } from '@/lib/api';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -34,33 +34,20 @@ export default function AuthPage() {
     setError('');
 
     try {
-      if (tab === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: form.email,
-          password: form.password,
-        });
-        if (error) throw error;
-        router.push('/dashboard');
-      } else {
+      if (tab === 'register') {
         if (!form.username.trim()) throw new Error('Username is required');
         if (form.username.length < 3) throw new Error('Username must be at least 3 characters');
-
-        const { data, error } = await supabase.auth.signUp({
-          email: form.email,
-          password: form.password,
-        });
-        if (error) throw error;
-
-        if (data.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
-            id: data.user.id,
-            username: form.username.toLowerCase(),
-            display_name: form.displayName || form.username,
-          });
-          if (profileError && !profileError.message.includes('duplicate')) throw profileError;
-        }
-        router.push('/dashboard');
       }
+
+      const demo = ensureDemoUser({
+        email: form.email,
+        username: form.username || form.email.split('@')[0],
+        displayName: form.displayName || form.username || 'Demo User',
+      });
+
+      setDemoUser(demo);
+      await api.users.getMe();
+      router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {

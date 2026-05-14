@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Zap, Flame, Trophy, Upload, BookOpen, ArrowRight, Target, Star, Clock, TrendingUp, Code as Code2, CircleCheck as CheckCircle2 } from 'lucide-react';
-import { supabase, type Profile, type Language, getLevelFromXP, getXPProgress } from '@/lib/supabase';
+import { api, getDemoUser, type Profile, type Language, getLevelFromXP, getXPProgress } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -25,12 +25,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push('/auth'); return; }
+      const demoUser = getDemoUser();
+      if (!demoUser) { router.push('/auth'); return; }
 
-      const [{ data: p }, { data: langs }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
-        supabase.from('languages').select('*').eq('is_active', true).order('sort_order'),
+      const [p, langs] = await Promise.all([
+        api.users.getMe(),
+        api.languages.list(),
       ]);
 
       if (p) setProfile(p);
@@ -62,7 +62,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">
-            Welcome back, {profile?.display_name || profile?.username || 'Coder'}!
+            Welcome back, {profile?.displayName || profile?.username || 'Coder'}!
           </h1>
           <p className="text-gray-500 mt-1">Keep pushing — every line you write builds your skills.</p>
         </div>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
                     className="w-10 h-10 rounded-lg mx-auto mb-3 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:scale-110 transition-transform"
                     style={{ backgroundColor: lang.color }}
                   >
-                    {lang.icon.toUpperCase()}
+                    {(lang.icon || lang.name.slice(0, 2)).toUpperCase()}
                   </div>
                   <p className="font-semibold text-gray-800 text-sm">{lang.name}</p>
                   <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{lang.description}</p>

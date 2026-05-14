@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Code as Code2, LayoutDashboard, BookOpen, Upload, BookMarked, Trophy, LogOut, User, Menu, X, Zap, Flame, ChevronDown } from 'lucide-react';
-import { supabase, type Profile, getLevelFromXP } from '@/lib/supabase';
+import { api, clearDemoUser, getDemoUser, type Profile, getLevelFromXP } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -27,17 +27,15 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        supabase.from('profiles').select('*').eq('id', data.user.id).maybeSingle().then(({ data: p }) => {
-          if (p) setProfile(p);
-        });
-      }
+    const demoUser = getDemoUser();
+    if (!demoUser) return;
+    api.users.getMe().then(setProfile).catch(() => {
+      setProfile(null);
     });
   }, []);
 
   async function signOut() {
-    await supabase.auth.signOut();
+    clearDemoUser();
     router.push('/');
   }
 
@@ -96,13 +94,13 @@ export default function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-gray-50 transition-colors">
                     <Avatar className="w-7 h-7">
-                      <AvatarImage src={profile.avatar_url} />
+                      <AvatarImage src={profile.avatarUrl} />
                       <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-bold">
-                        {(profile.display_name || profile.username).charAt(0).toUpperCase()}
+                        {(profile.displayName || profile.username).charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden sm:flex flex-col items-start">
-                      <span className="text-xs font-semibold text-gray-900 leading-none">{profile.display_name || profile.username}</span>
+                      <span className="text-xs font-semibold text-gray-900 leading-none">{profile.displayName || profile.username}</span>
                       <span className="text-xs text-gray-400">Level {level}</span>
                     </div>
                     <ChevronDown className="w-3 h-3 text-gray-400" />
