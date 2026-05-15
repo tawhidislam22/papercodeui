@@ -1,10 +1,10 @@
-import Navbar from '@/components/Navbar';
+import Sidebar from '@/components/Sidebar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="pt-16">{children}</main>
+      <Sidebar />
+      <main className="ml-60">{children}</main>
     </div>
   );
 }

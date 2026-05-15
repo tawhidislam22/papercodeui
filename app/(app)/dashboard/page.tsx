@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Zap, Flame, Trophy, Upload, BookOpen, ArrowRight, Target, Star, Clock, TrendingUp, Code as Code2, CircleCheck as CheckCircle2 } from 'lucide-react';
+import { Zap, Flame, Trophy, Upload, BookOpen, ArrowRight, Target, Star, Clock, TrendingUp, Code as Code2, CircleCheck as CheckCircle2, Award, Download } from 'lucide-react';
 import { api, getDemoUser, type Profile, type Language, getLevelFromXP, getXPProgress } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { adminApi, type Certificate } from '@/lib/admin-api';
 
 const XP_ACTIONS = [
   { action: 'Daily login', xp: 5, icon: Star, color: 'text-yellow-500' },
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [loading, setLoading] = useState(true);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -33,7 +35,10 @@ export default function DashboardPage() {
         api.languages.list(),
       ]);
 
-      if (p) setProfile(p);
+      if (p) {
+        setProfile(p);
+        try { const certs = await adminApi.certificates.listForUser(p.id); setCertificates(certs); } catch { /* ignore */ }
+      }
       if (langs) setLanguages(langs);
       setLoading(false);
     }
@@ -80,7 +85,7 @@ export default function DashboardPage() {
           { label: 'Level', value: `Lv. ${level}`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Total XP', value: `${profile?.xp ?? 0} XP`, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Streak', value: `${profile?.streak ?? 0} days`, icon: Flame, color: 'text-orange-600', bg: 'bg-orange-50' },
-          { label: 'Longest streak', value: `${profile?.longest_streak ?? 0} days`, icon: Trophy, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Longest streak', value: `${profile?.longestStreak ?? 0} days`, icon: Trophy, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4">
             <div className={`w-11 h-11 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
@@ -195,6 +200,40 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Certificates section */}
+      {certificates.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-500" /> My Certificates
+            </h2>
+            <Badge className="bg-amber-50 text-amber-700 border-amber-100">{certificates.length} earned</Badge>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {certificates.map((cert) => (
+              <div key={cert.id} className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white relative overflow-hidden group">
+                <div className="absolute right-3 top-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Award className="w-16 h-16" />
+                </div>
+                <Award className="w-6 h-6 text-amber-400 mb-2" />
+                <h3 className="font-bold text-sm truncate">{cert.title}</h3>
+                {cert.description && <p className="text-slate-400 text-xs mt-1 line-clamp-2">{cert.description}</p>}
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-slate-500">Issued {new Date(cert.issuedAt).toLocaleDateString()}</p>
+                  <a
+                    href={`/api/certificate?title=${encodeURIComponent(cert.title)}&name=${encodeURIComponent(profile?.displayName || profile?.username || '')}&description=${encodeURIComponent(cert.description)}&issuedAt=${encodeURIComponent(cert.issuedAt)}&issuedBy=${encodeURIComponent(cert.issuedBy)}`}
+                    download
+                    className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                  >
+                    <Download className="w-3 h-3" /> Download
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent activity placeholder */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">

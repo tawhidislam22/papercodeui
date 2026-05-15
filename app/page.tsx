@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Code as Code2, Upload, Zap, BookOpen, Trophy, ArrowRight, Check, ChevronRight, Brain, Camera, Terminal, Sparkles, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Code as Code2, Upload, Zap, BookOpen, Trophy, ArrowRight, Check, ChevronRight, Brain, Camera, Terminal, Sparkles, Play, LayoutDashboard, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getDemoUser } from '@/lib/api';
 
 const FEATURES = [
   { icon: Camera, title: 'Write Code on Paper', description: 'The traditional way of learning. Handwriting code builds deeper understanding than just typing.', color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -48,6 +49,12 @@ const BLOG_PREVIEWS = [
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState<'write' | 'upload' | 'run'>('write');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const user = getDemoUser();
+    setIsLoggedIn(!!user);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -67,12 +74,29 @@ export default function LandingPage() {
               <a href="#languages" className="hover:text-gray-900 transition-colors">Languages</a>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/auth"><Button variant="ghost" size="sm">Sign in</Button></Link>
-              <Link href="/auth?tab=register">
-                <Button size="sm" className="text-white border-0" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
-                  Get started
-                </Button>
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <LayoutDashboard className="w-4 h-4" /> Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/profile">
+                    <Button size="sm" className="text-white border-0 gap-2" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
+                      <User className="w-4 h-4" /> Profile
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth"><Button variant="ghost" size="sm">Sign in</Button></Link>
+                  <Link href="/auth?tab=register">
+                    <Button size="sm" className="text-white border-0" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
+                      Get started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

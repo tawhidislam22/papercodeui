@@ -11,6 +11,7 @@ import { submissionsRouter } from './submissions/submissions.routes.js';
 import { blogsRouter } from './blogs/blogs.routes.js';
 import { commentsRouter } from './comments/comments.routes.js';
 import { xpRouter } from './xp/xp.routes.js';
+import { adminRouter } from './admin/admin.routes.js';
 
 export const apiRouter = Router();
 
@@ -26,3 +27,4 @@ apiRouter.use('/submissions', submissionsRouter);
 apiRouter.use('/blogs', blogsRouter);
 apiRouter.use('/comments', commentsRouter);
 apiRouter.use('/xp', xpRouter);
+apiRouter.use('/admin', adminRouter);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const JUDGE0_URL = 'https://ce.judge0.com/submissions?wait=true';
+const JUDGE0_URL = process.env.JUDGE0_URL ?? 'https://ce.judge0.com/submissions?wait=true';
 
 interface Judge0Response {
   stdout?: string | null;

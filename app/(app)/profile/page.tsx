@@ -60,7 +60,7 @@ export default function ProfilePage() {
   const ACTIVITY_ITEMS = [
     { label: 'Total XP', value: `${profile.xp.toLocaleString()} XP`, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
     { label: 'Current Streak', value: `${profile.streak} days`, icon: Flame, color: 'text-orange-600', bg: 'bg-orange-50' },
-    { label: 'Longest Streak', value: `${profile.longest_streak} days`, icon: Trophy, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Longest Streak', value: `${profile.longestStreak} days`, icon: Trophy, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { label: 'Level', value: `Level ${level}`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
   ];
 

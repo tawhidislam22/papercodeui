@@ -202,10 +202,11 @@ type DemoUser = {
 
 const DEMO_USER_KEY = 'papercode.demoUser';
 
-export const isApiConfigured = Boolean(process.env.NEXT_PUBLIC_API_URL);
+export const isApiConfigured = Boolean(process.env.NEXT_PUBLIC_BACKEND_URL);
 
-const defaultBaseUrl = 'http://localhost:4000';
-const apiBaseUrl = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? defaultBaseUrl);
+const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+	? normalizeApiBase(process.env.NEXT_PUBLIC_BACKEND_URL)
+	: '';
 
 function normalizeApiBase(input: string) {
 	const trimmed = input.replace(/\/+$/, '');
@@ -269,6 +270,9 @@ function getDemoHeaders() {
 }
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+	if (!apiBaseUrl) {
+		throw new Error('NEXT_PUBLIC_BACKEND_URL is not set.');
+	}
 	const headers = new Headers(options.headers || {});
 	const demoHeaders = getDemoHeaders();
 	Object.entries(demoHeaders).forEach(([key, value]) => headers.set(key, value));
