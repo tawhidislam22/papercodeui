@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^6.0.0",
     "@google/genai": "^2.2.0",
     "@hookform/resolvers": "^3.9.0",
     "@monaco-editor/react": "^4.6.1",
@@ -46,6 +47,7 @@
     "@types/node": "20.6.2",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
+    "prisma": "^6.0.0",
     "autoprefixer": "10.4.15",
     "bufferutil": "^4.0.8",
     "class-variance-authority": "^0.7.0",
