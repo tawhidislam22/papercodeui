@@ -14,6 +14,8 @@ import {
   User,
   Users,
   Shield,
+  Menu,
+  X,
 } from 'lucide-react';
 import { api, clearDemoUser, getDemoUser, type Profile, getLevelFromXP } from '@/lib/api';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,12 +24,18 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const demoUser = getDemoUser();
     if (!demoUser) return;
     api.users.getMe().then(setProfile).catch(() => setProfile(null));
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function signOut() {
     clearDemoUser();
@@ -46,7 +54,6 @@ export default function Sidebar() {
     { href: '/admin/lessons', icon: BookOpen, label: 'Lessons', adminOnly: true },
   ];
 
-  // Non-admin sees different dashboard
   const userItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', adminOnly: false, exact: true },
     { href: '/lessons', icon: BookOpen, label: 'Lessons', adminOnly: false },
@@ -57,8 +64,8 @@ export default function Sidebar() {
 
   const items = isAdmin ? NAV_ITEMS : userItems;
 
-  return (
-    <aside className="fixed left-0 top-0 bottom-0 w-60 bg-white border-r border-gray-100 flex flex-col z-40">
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2.5 px-5 py-5 shrink-0">
         <div
@@ -141,6 +148,57 @@ export default function Sidebar() {
           </Link>
         </div>
       )}
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ── Mobile top bar ── */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 h-14 flex items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}
+          >
+            <Code2 className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-extrabold text-gray-900 tracking-tight">Paper Code</span>
+        </Link>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5 text-gray-700" />
+        </button>
+      </header>
+
+      {/* ── Desktop sidebar ── */}
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-white border-r border-gray-100 flex-col z-40">
+        <SidebarContent />
+      </aside>
+
+      {/* ── Mobile sidebar overlay ── */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer */}
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col">
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100 transition-colors z-10"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

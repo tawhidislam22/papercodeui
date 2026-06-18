@@ -270,8 +270,10 @@ function getDemoHeaders() {
 }
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+	// If no backend URL is configured, return null silently instead of crashing
 	if (!apiBaseUrl) {
-		throw new Error('NEXT_PUBLIC_BACKEND_URL is not set.');
+		console.warn('[api] NEXT_PUBLIC_BACKEND_URL is not set — skipping request to', path);
+		return null as T;
 	}
 	const headers = new Headers(options.headers || {});
 	const demoHeaders = getDemoHeaders();
@@ -281,21 +283,30 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 		headers.set('content-type', 'application/json');
 	}
 
-	const response = await fetch(`${apiBaseUrl}${path}`, {
-		...options,
-		headers,
-	});
+	try {
+		const response = await fetch(`${apiBaseUrl}${path}`, {
+			...options,
+			headers,
+		});
 
-	if (response.status === 204) {
-		return null as T;
+		if (response.status === 204) {
+			return null as T;
+		}
+
+		if (!response.ok) {
+			const text = await response.text();
+			throw new Error(text || `Request failed (${response.status})`);
+		}
+
+		return response.json() as Promise<T>;
+	} catch (err: any) {
+		// Network errors (backend offline, CORS, etc.) — don't crash the UI
+		if (err?.name === 'TypeError' && err?.message === 'Failed to fetch') {
+			console.warn('[api] Backend unreachable for', path, '— is NEXT_PUBLIC_BACKEND_URL correct?');
+			return null as T;
+		}
+		throw err;
 	}
-
-	if (!response.ok) {
-		const text = await response.text();
-		throw new Error(text || `Request failed (${response.status})`);
-	}
-
-	return response.json() as Promise<T>;
 }
 
 export const api = {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Code as Code2, Upload, Zap, BookOpen, Trophy, ArrowRight, Check, ChevronRight, Brain, Camera, Terminal, Sparkles, Play, LayoutDashboard, User } from 'lucide-react';
+import { Code as Code2, Upload, Zap, BookOpen, Trophy, ArrowRight, Check, ChevronRight, Brain, Camera, Terminal, Sparkles, Play, LayoutDashboard, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getDemoUser } from '@/lib/api';
@@ -47,9 +47,16 @@ const BLOG_PREVIEWS = [
   { title: 'Understanding Pointers in C — The Visual Way', excerpt: 'Pointers confuse everyone at first. This guide uses diagrams and handwritten examples to make them click.', tag: 'C', tagColor: 'bg-slate-50 text-slate-700', mins: 12 },
 ];
 
+const MOBILE_NAV_LINKS = [
+  { href: '#features', label: 'Features' },
+  { href: '#how-it-works', label: 'How it works' },
+  { href: '#languages', label: 'Languages' },
+];
+
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState<'write' | 'upload' | 'run'>('write');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const user = getDemoUser();
@@ -62,18 +69,20 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
                 <Code2 className="w-4 h-4 text-white" />
               </div>
               <span className="font-bold text-lg tracking-tight text-gray-900">Paper Code</span>
             </div>
+            
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
               <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
               <a href="#how-it-works" className="hover:text-gray-900 transition-colors">How it works</a>
               <a href="#languages" className="hover:text-gray-900 transition-colors">Languages</a>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="hidden md:flex items-center gap-3">
               {isLoggedIn ? (
                 <>
                   <Link href="/dashboard">
@@ -98,7 +107,57 @@ export default function LandingPage() {
                 </>
               )}
             </div>
+
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5 text-gray-700" /> : <Menu className="w-5 h-5 text-gray-700" />}
+            </button>
           </div>
+
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-100 py-3 space-y-1">
+              {MOBILE_NAV_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+              <div className="pt-2 border-t border-gray-100 flex flex-col gap-2 px-1">
+                {isLoggedIn ? (
+                  <>
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full gap-2 justify-center">
+                        <LayoutDashboard className="w-4 h-4" /> Dashboard
+                      </Button>
+                    </Link>
+                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <Button size="sm" className="w-full text-white border-0 gap-2 justify-center" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
+                        <User className="w-4 h-4" /> Profile
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full">Sign in</Button>
+                    </Link>
+                    <Link href="/auth?tab=register" onClick={() => setMobileMenuOpen(false)}>
+                      <Button size="sm" className="w-full text-white border-0" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
+                        Get started
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
