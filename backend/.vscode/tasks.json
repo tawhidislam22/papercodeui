@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Push Prisma schema",
+			"type": "shell",
+			"command": "pnpm prisma db push && pnpm prisma generate"
+		}
+	]
+}
