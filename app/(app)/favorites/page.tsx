@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { api, getDemoUser } from '@/lib/api';
 import { Heart, BookOpen, BookMarked, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 
 export default function FavoritesPage() {
@@ -86,12 +87,18 @@ export default function FavoritesPage() {
           ) : (
             lessonBookmarks.map((bookmark) => (
               <Link key={bookmark.id} href={`/lessons/${bookmark.lesson.slug}`}>
-                <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all h-full flex flex-col cursor-pointer">
-                  <div className="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wide">
-                    {bookmark.lesson.language.name}
+                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all h-full flex flex-col">
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 55%)' }} />
+                  <div className="relative z-10 flex items-center gap-2 mb-3">
+                    <Badge className="bg-blue-50 text-blue-700 border-blue-100 text-xs font-medium uppercase">{bookmark.lesson.language.name}</Badge>
+                    {bookmark.lesson.difficulty && (
+                      <Badge variant="outline" className="text-xs capitalize">{bookmark.lesson.difficulty.toLowerCase()}</Badge>
+                    )}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{bookmark.lesson.title}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-3">{bookmark.lesson.description}</p>
+                  <h3 className="relative z-10 text-xl font-bold text-gray-900 leading-tight mb-3 group-hover:text-blue-600 transition-colors">
+                    {bookmark.lesson.title}
+                  </h3>
+                  <p className="relative z-10 text-sm text-gray-500 line-clamp-3">{bookmark.lesson.description}</p>
                 </div>
               </Link>
             ))
@@ -112,11 +119,31 @@ export default function FavoritesPage() {
           ) : (
             blogBookmarks.map((bookmark) => (
               <Link key={bookmark.id} href={`/blogs/${bookmark.blog.id}`}>
-                <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all h-full flex flex-col cursor-pointer">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{bookmark.blog.title}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-3 mb-4">{bookmark.blog.excerpt}</p>
-                  <div className="mt-auto text-xs font-semibold text-gray-400">
-                    By {bookmark.blog.author?.displayName || 'Anonymous'}
+                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all h-full flex flex-col">
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at top left, rgba(16,185,129,0.08), transparent 55%)' }} />
+                  <div className="relative z-10 flex items-center gap-2 mb-3">
+                    {bookmark.blog.tags && bookmark.blog.tags.length > 0 ? (
+                      bookmark.blog.tags.slice(0, 2).map((tag) => (
+                        <Badge key={tag} className="bg-emerald-50 text-emerald-700 border-emerald-100 text-xs font-medium">{tag}</Badge>
+                      ))
+                    ) : (
+                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 text-xs font-medium">Post</Badge>
+                    )}
+                  </div>
+                  <h3 className="relative z-10 text-xl font-bold text-gray-900 leading-tight mb-3 group-hover:text-emerald-600 transition-colors flex-1">
+                    {bookmark.blog.title}
+                  </h3>
+                  <p className="relative z-10 text-sm text-gray-500 line-clamp-3 mb-4">{bookmark.blog.excerpt}</p>
+                  
+                  <div className="relative z-10 mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                        {(bookmark.blog.author?.displayName || bookmark.blog.author?.username || '?').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="text-xs font-semibold text-gray-700">
+                        {bookmark.blog.author?.displayName || 'Anonymous'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Link>
