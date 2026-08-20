@@ -7,6 +7,7 @@ import { api, getDemoUser, type Blog } from '@/lib/api';
 import { BookOpen, PenTool, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default function MyBlogsPage() {
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function MyBlogsPage() {
                 <Badge variant={blog.isPublished ? 'default' : 'secondary'} className={blog.isPublished ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : ''}>
                   {blog.isPublished ? 'Published' : 'Draft'}
                 </Badge>
-                <p className="text-xs text-gray-400">{new Date(blog.createdAt).toLocaleDateString()}</p>
+                <p className="text-xs text-gray-400">{new Date(blog.createdAt || Date.now()).toLocaleDateString()}</p>
               </div>
               <h3 className="font-bold text-gray-900 mb-2 line-clamp-2" title={blog.title}>{blog.title}</h3>
               <p className="text-sm text-gray-500 line-clamp-3 mb-6 flex-1">{blog.excerpt || 'No excerpt available.'}</p>
@@ -75,13 +76,21 @@ export default function MyBlogsPage() {
                   View Post
                 </Link>
                 <div className="flex gap-2">
+                  <Link href={`/blogs/${blog.id}/edit`}>
+                    <Button size="sm" variant="outline" className="h-8 text-xs font-medium">Edit</Button>
+                  </Link>
                   <Button
                     size="sm"
                     variant="outline"
                     className="h-8 text-xs font-medium"
                     onClick={async () => {
-                      await api.blogs.update(blog.id, { isPublished: !blog.isPublished });
-                      setMyBlogs(await api.blogs.getMyBlogs());
+                      try {
+                        await api.blogs.update(blog.id, { isPublished: !blog.isPublished });
+                        setMyBlogs(await api.blogs.getMyBlogs());
+                        toast.success(blog.isPublished ? 'Blog unpublished' : 'Blog published successfully');
+                      } catch (e) {
+                        toast.error('Failed to update blog');
+                      }
                     }}
                   >
                     {blog.isPublished ? 'Unpublish' : 'Publish'}
@@ -92,8 +101,13 @@ export default function MyBlogsPage() {
                     className="h-8 text-xs font-medium"
                     onClick={async () => {
                       if (confirm('Are you sure you want to delete this blog post?')) {
-                        await api.blogs.delete(blog.id);
-                        setMyBlogs(await api.blogs.getMyBlogs());
+                        try {
+                          await api.blogs.delete(blog.id);
+                          setMyBlogs(await api.blogs.getMyBlogs());
+                          toast.success('Blog deleted successfully');
+                        } catch (e) {
+                          toast.error('Failed to delete blog');
+                        }
                       }
                     }}
                   >

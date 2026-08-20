@@ -1,29 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Eye, Loader as Loader2, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { api, getDemoUser } from '@/lib/api';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 
 const SUGGESTED_TAGS = ['JavaScript', 'Python', 'C', 'C++', 'Java', 'TypeScript', 'Learning', 'Tips', 'Projects', 'Algorithms'];
 
-export default function NewBlogPage() {
+export default function EditBlogPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const { id } = params;
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(false);
+
+  useEffect(() => {
+    const demoUser = getDemoUser();
+    if (!demoUser) {
+      router.push('/login');
+      return;
+    }
+    
+    api.blogs.getById(id).then((data: any) => {
+      setTitle(data.title || '');
+      setExcerpt(data.excerpt || '');
+      setContent(data.content || '');
+      setTags(data.tags || []);
+    }).catch((err: any) => {
+      setError('Failed to load blog');
+      toast.error('Failed to load blog');
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, [id, router]);
 
   function addTag(tag: string) {
     if (tag && !tags.includes(tag) && tags.length < 5) {
@@ -36,10 +58,6 @@ export default function NewBlogPage() {
     setTags(tags.filter((t) => t !== tag));
   }
 
-  function slugify(text: string) {
-    return text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 80);
-  }
-
   async function publish(published: boolean) {
     if (!title.trim()) { setError('Title is required'); return; }
     if (!content.trim()) { setError('Content is required'); return; }
@@ -49,13 +67,11 @@ export default function NewBlogPage() {
     const demoUser = getDemoUser();
     if (!demoUser) { router.push('/login'); return; }
 
-    const slug = slugify(title) + '-' + Date.now();
     const readingTime = Math.max(1, Math.ceil(content.split(' ').length / 200));
 
     try {
-      await api.blogs.create({
+      await api.blogs.update(id, {
         title: title.trim(),
-        slug,
         excerpt: excerpt.trim() || content.trim().slice(0, 200),
         content: content.trim(),
         tags,
@@ -63,23 +79,23 @@ export default function NewBlogPage() {
         readingTime,
       });
 
-      if (published) {
-        await api.xp.award({
-          eventType: 'publish_blog',
-          xpAmount: 25,
-          description: 'Published a blog post',
-        });
-      }
-
-      toast.success(published ? 'Blog published successfully!' : 'Draft saved!');
+      toast.success(published ? 'Blog published!' : 'Draft saved!');
       router.push('/dashboard/my-blogs');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to publish';
+      const msg = err instanceof Error ? err.message : 'Failed to update';
       setError(msg);
       toast.error(msg);
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
   }
 
   return (

@@ -60,7 +60,6 @@ export default function Sidebar() {
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', adminOnly: false, exact: true },
     { href: '/dashboard/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
     { href: '/lessons', icon: BookOpen, label: 'Lessons', adminOnly: false },
-    { href: '/blogs', icon: BookMarked, label: 'Blog', adminOnly: false },
     { href: '/dashboard/my-blogs', icon: PenTool, label: 'My Blogs', adminOnly: false },
     { href: '/favorites', icon: Heart, label: 'Favorites', adminOnly: false },
     { href: '/leaderboard', icon: Trophy, label: 'Leaderboard', adminOnly: false },

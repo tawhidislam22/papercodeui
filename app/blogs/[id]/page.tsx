@@ -7,7 +7,7 @@ import { ArrowLeft, Heart, MessageCircle, Bookmark, Clock, Eye, Share2 } from 'l
 import { api, getDemoUser, type Blog, type Profile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
+import { toast } from 'sonner';
 
 export default function BlogPostPage() {
   const { id } = useParams<{ id: string }>();
@@ -125,11 +125,16 @@ export default function BlogPostPage() {
             size="sm"
             onClick={async () => {
               const demoUser = getDemoUser();
-              if (!demoUser) return;
+              if (!demoUser) {
+                toast.error('Please log in to save posts');
+                return;
+              }
               try {
                 const res = await api.bookmarks.toggleBlog(id);
                 setBookmarked(res.bookmarked);
+                toast.success(res.bookmarked ? 'Saved to favorites!' : 'Removed from favorites');
               } catch (e) {
+                toast.error('Failed to update favorites');
                 console.error(e);
               }
             }}

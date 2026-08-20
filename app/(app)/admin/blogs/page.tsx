@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
+import { toast } from 'sonner';
+
 export default function AdminBlogsPage() {
   const [blogs, setBlogs] = useState<AdminBlog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,35 +31,45 @@ export default function AdminBlogsPage() {
   useEffect(() => { load(); }, [load]);
 
   async function togglePublish(blog: AdminBlog) {
-    await adminApi.blogs.update(blog.id, { isPublished: !blog.isPublished });
-    load();
+    try {
+      await adminApi.blogs.update(blog.id, { isPublished: !blog.isPublished });
+      toast.success(blog.isPublished ? 'Blog unpublished' : 'Blog published');
+      load();
+    } catch {
+      toast.error('Failed to update blog');
+    }
   }
 
   async function removeBlog(id: string) {
     if (!confirm('Delete this blog post?')) return;
-    await adminApi.blogs.remove(id);
-    load();
+    try {
+      await adminApi.blogs.remove(id);
+      toast.success('Blog deleted');
+      load();
+    } catch {
+      toast.error('Failed to delete blog');
+    }
   }
 
   async function createBlog() {
-    if (!newTitle.trim()) return;
     setCreating(true);
     try {
       await adminApi.blogs.create({
-        title: newTitle.trim(),
-        excerpt: newExcerpt.trim(),
+        title: newTitle,
+        excerpt: newExcerpt,
         content: newContent,
-        tags: newTags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: newTags.split(',').map((t) => t.trim()),
         isPublished: newPublish,
       });
-      setNewTitle(''); setNewExcerpt(''); setNewContent(''); setNewTags(''); setNewPublish(false);
       setShowCreate(false);
+      setNewTitle(''); setNewExcerpt(''); setNewContent(''); setNewTags('');
+      toast.success('Blog created successfully');
       load();
     } catch (e) {
+      toast.error('Failed to create blog');
       console.error(e);
-    } finally {
-      setCreating(false);
     }
+    setCreating(false);
   }
 
   const filtered = blogs.filter(
