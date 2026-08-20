@@ -7,6 +7,14 @@ export async function login(req, res) {
     const result = await authService.login(req.body);
     return res.status(200).json(result);
 }
+export async function verifyOTP(req, res) {
+    const result = await authService.verifyOTP(req.body);
+    return res.status(200).json(result);
+}
+export async function resendOTP(req, res) {
+    const result = await authService.resendOTP(req.body);
+    return res.status(200).json(result);
+}
 export async function logout(_req, res) {
     await authService.logout();
     return res.status(204).send();
