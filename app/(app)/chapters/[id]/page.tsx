@@ -68,10 +68,6 @@ export default function ChapterLearningPage() {
       markCompleted(blockId);
       api.progress.completeBlock(chapter.id, { lessonId: chapter.lessonId, blockId }).catch(console.error);
     }
-
-    if (!wasCompleted && blockId === blocks[blocks.length - 1].id) {
-      api.progress.completeChapter(chapter.id, { lessonId: chapter.lessonId }).catch(console.error);
-    }
   }
 
   if (chapterQuery.isLoading) {
@@ -175,11 +171,21 @@ export default function ChapterLearningPage() {
 
               {activeIndex === blocks.length - 1 && completedBlockIds.includes(activeBlock.id) && (
                 <div className="mt-8 flex justify-end pt-6 border-t border-gray-100">
-                  <Link href={nextChapterId ? `/chapters/${nextChapterId}` : `/lessons/${chapter.lesson.slug}`}>
-                    <Button className="rounded-xl shadow-lg hover:shadow-xl transition-all" size="lg" style={{ background: 'linear-gradient(135deg,#10b981,#3b82f6)' }}>
-                      {nextChapterId ? 'Continue to Next Chapter' : 'Complete Lesson'} <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        await api.progress.completeChapter(chapter.id, { lessonId: chapter.lessonId });
+                      } catch (err) {
+                        console.error(err);
+                      }
+                      window.location.href = nextChapterId ? `/chapters/${nextChapterId}` : `/lessons/${chapter.lesson.slug}`;
+                    }}
+                    className="rounded-xl shadow-lg hover:shadow-xl transition-all" 
+                    size="lg" 
+                    style={{ background: 'linear-gradient(135deg,#10b981,#3b82f6)' }}
+                  >
+                    {nextChapterId ? 'Complete & Go to Next Chapter' : 'Complete Chapter & Finish'} <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                  </Button>
                 </div>
               )}
             </div>
