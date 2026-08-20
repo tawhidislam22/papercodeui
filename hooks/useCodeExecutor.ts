@@ -10,7 +10,7 @@ interface ExecutorState {
 }
 
 interface UseCodeExecutorReturn extends ExecutorState {
-  runCode: (code: string, languageId?: number) => Promise<string | null>;
+  runCode: (code: string, languageId?: number, stdin?: string) => Promise<string | null>;
   reset: () => void;
 }
 
@@ -23,7 +23,7 @@ export function useCodeExecutor(): UseCodeExecutorReturn {
   });
 
   const runCode = useCallback(
-    async (code: string, languageId = 109): Promise<string | null> => {
+    async (code: string, languageId = 109, stdin = ''): Promise<string | null> => {
       if (!code.trim()) return null;
 
       setState((prev) => ({ ...prev, isRunning: true, error: null, output: '' }));
@@ -32,7 +32,7 @@ export function useCodeExecutor(): UseCodeExecutorReturn {
         const res = await fetch('/api/execute-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, languageId }),
+          body: JSON.stringify({ code, languageId, stdin }),
         });
 
         const data = await res.json();

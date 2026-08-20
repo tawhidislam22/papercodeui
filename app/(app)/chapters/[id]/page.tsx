@@ -25,6 +25,22 @@ export default function ChapterLearningPage() {
 
   const chapter = chapterQuery.data;
 
+  const lessonQuery = useQuery({
+    queryKey: ['lesson', chapter?.lesson.slug],
+    queryFn: () => api.lessons.getBySlug(chapter!.lesson.slug),
+    enabled: !!chapter?.lesson.slug,
+  });
+
+  const nextChapterId = useMemo(() => {
+    if (!lessonQuery.data || !chapter) return null;
+    const chapters = lessonQuery.data.chapters;
+    const idx = chapters.findIndex(c => c.id === chapter.id);
+    if (idx >= 0 && idx < chapters.length - 1) {
+      return chapters[idx + 1].id;
+    }
+    return null;
+  }, [lessonQuery.data, chapter]);
+
   const blocks = useMemo(() => chapter?.blocks ?? [], [chapter]);
 
   useEffect(() => {
@@ -118,11 +134,21 @@ export default function ChapterLearningPage() {
                 />
               )}
 
-              {activeBlock.type === 'THEORY' && (
+              {activeBlock.type === 'THEORY' && !(activeIndex === blocks.length - 1 && completedBlockIds.includes(activeBlock.id)) && (
                 <div className="mt-4 flex justify-end">
                   <Button onClick={() => handleCompleteBlock(activeBlock.id)} className="rounded-xl">
                     Continue
                   </Button>
+                </div>
+              )}
+
+              {activeIndex === blocks.length - 1 && completedBlockIds.includes(activeBlock.id) && (
+                <div className="mt-8 flex justify-end pt-6 border-t border-gray-100">
+                  <Link href={nextChapterId ? `/chapters/${nextChapterId}` : `/lessons/${chapter.lesson.slug}`}>
+                    <Button className="rounded-xl shadow-lg hover:shadow-xl transition-all" size="lg" style={{ background: 'linear-gradient(135deg,#10b981,#3b82f6)' }}>
+                      {nextChapterId ? 'Continue to Next Chapter' : 'Complete Lesson'} <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>

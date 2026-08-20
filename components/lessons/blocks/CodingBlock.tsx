@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Editor from '@monaco-editor/react';
-import { CloudUpload, Loader2, Play, Send, AlertCircle } from 'lucide-react';
+import { CloudUpload, Loader2, Play, Send, AlertCircle, Terminal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type CodingChallenge } from '@/lib/api';
 import { useCodeExtractor } from '@/hooks/useCodeExtractor';
@@ -35,6 +35,7 @@ export function CodingBlock({
   const [language, setLanguage] = useState<string>(challenge.language || 'python');
   const [code, setCode] = useState<string>(challenge.starterCode || '');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [stdin, setStdin] = useState<string>('');
 
   const extractor = useCodeExtractor();
   const executor = useCodeExecutor();
@@ -56,7 +57,7 @@ export function CodingBlock({
   async function handleRun() {
     if (!code.trim()) return;
     const languageId = JUDGE0_IDS[language] ?? 71;
-    const output = await executor.runCode(code, languageId);
+    const output = await executor.runCode(code, languageId, stdin);
 
     // Simple "correct" check: if expected output exists and stdout matches
     if (
@@ -161,21 +162,35 @@ export function CodingBlock({
             )}
           </div>
 
-          {/* Terminal */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-900 text-gray-100 p-4 text-xs min-h-[120px]">
-            <p className="text-emerald-300 mb-2 font-semibold">Terminal output</p>
+          {/* Terminal / Stdin */}
+          <div className="rounded-2xl bg-gray-900 p-4 font-mono text-xs text-gray-100 min-h-[160px] flex flex-col">
+            <div className="flex items-center justify-between text-gray-400 mb-2 border-b border-gray-800 pb-2">
+              <span className="flex items-center gap-1">
+                <Terminal className="w-3 h-3" /> Output
+              </span>
+            </div>
             {executor.isRunning ? (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-blue-400">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Running…
               </div>
             ) : executor.error ? (
-              <pre className="text-rose-400 whitespace-pre-wrap">{executor.error}</pre>
+              <pre className="text-rose-400 whitespace-pre-wrap max-h-40 overflow-y-auto">{executor.error}</pre>
             ) : (
-              <pre className="whitespace-pre-wrap text-emerald-200">
+              <pre className="whitespace-pre-wrap text-emerald-200 max-h-40 overflow-y-auto">
                 {executor.output || 'Run your code to see output.'}
               </pre>
             )}
+          </div>
+          
+          <div className="rounded-2xl border border-gray-200 p-3 bg-white">
+             <label className="text-xs font-semibold text-gray-500 mb-1.5 block uppercase tracking-wider">Input (stdin)</label>
+             <textarea 
+               value={stdin}
+               onChange={(e) => setStdin(e.target.value)}
+               placeholder="Optional: Provide input for your program here..."
+               className="w-full h-20 text-xs p-2 bg-gray-50 border-none rounded-lg resize-none focus:ring-0 text-gray-700"
+             />
           </div>
 
           {/* AI feedback (verdict) */}
