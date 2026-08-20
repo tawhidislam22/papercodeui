@@ -22,8 +22,8 @@ export const blogsService = {
   getComments(blogId: string) {
     return blogsRepo.getComments(blogId);
   },
-  addComment(blogId: string, userId: string, content: string) {
-    return blogsRepo.addComment(blogId, userId, content);
+  addComment(blogId: string, userId: string, content: string, parentId?: string) {
+    return blogsRepo.addComment(blogId, userId, content, parentId);
   },
   deleteComment(blogId: string, commentId: string, userId: string) {
     return blogsRepo.deleteComment(blogId, commentId, userId);

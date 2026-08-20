@@ -46,7 +46,7 @@ export async function getComments(req: Request, res: Response) {
 export async function addComment(req: Request, res: Response) {
   if (!res.locals.user) return res.status(401).json({ error: 'Unauthorized' });
   if (!req.body.content || typeof req.body.content !== 'string') return res.status(400).json({ error: 'Content is required' });
-  const comment = await blogsService.addComment(req.params.id, res.locals.user.id, req.body.content);
+  const comment = await blogsService.addComment(req.params.id, res.locals.user.id, req.body.content, req.body.parentId);
   return res.status(201).json(comment);
 }
 

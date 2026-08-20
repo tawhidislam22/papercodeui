@@ -438,10 +438,10 @@ export const api = {
 		getComments(id: string) {
 			return apiFetch<any[]>(`/blogs/${id}/comments`);
 		},
-		addComment(id: string, content: string) {
+		addComment(id: string, content: string, parentId?: string) {
 			return apiFetch<any>(`/blogs/${id}/comments`, {
 				method: 'POST',
-				body: JSON.stringify({ content }),
+				body: JSON.stringify({ content, parentId }),
 			});
 		},
 		deleteComment(id: string, commentId: string) {
