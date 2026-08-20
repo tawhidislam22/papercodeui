@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, Heart, MessageCircle, Bookmark, Clock, Eye, Share2 } from 'lucide-react';
-import { api, type Blog, type Profile } from '@/lib/api';
+import { api, getDemoUser, type Blog, type Profile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
