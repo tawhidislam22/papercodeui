@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, BookOpen, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { api, getDemoUser } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { LessonSidebar } from '@/components/lessons/LessonSidebar';
 import { ChapterRow } from '@/components/lessons/ChapterRow';
