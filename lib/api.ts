@@ -1,5 +1,6 @@
 export type Profile = {
 	id: string;
+	email?: string;
 	username: string;
 	displayName: string;
 	avatarUrl: string;
@@ -311,8 +312,20 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 export const api = {
 	auth: {
+		login(data: any) {
+			return apiFetch<{ user: Profile, demoUserId: string }>('/auth/login', { method: 'POST', body: JSON.stringify(data) });
+		},
+		register(data: any) {
+			return apiFetch<{ message?: string, requiresOtp?: boolean, user?: Profile, demoUserId?: string }>('/auth/register', { method: 'POST', body: JSON.stringify(data) });
+		},
+		verifyOTP(data: any) {
+			return apiFetch<{ user: Profile, demoUserId: string }>('/auth/verify-otp', { method: 'POST', body: JSON.stringify(data) });
+		},
+		resendOTP(data: any) {
+			return apiFetch<{ message: string }>('/auth/resend-otp', { method: 'POST', body: JSON.stringify(data) });
+		},
 		getSession() {
-			return apiFetch<{ user: Profile | null }>('/auth/session');
+			return apiFetch<{ user: Profile | null }>('/auth/session', { method: 'GET' });
 		},
 	},
 	users: {

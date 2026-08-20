@@ -7,7 +7,7 @@ import { Code as Code2, Eye, EyeOff, ArrowLeft, Loader as Loader2 } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { api, ensureDemoUser, setDemoUser } from '@/lib/api';
+import { api, setDemoUser } from '@/lib/api';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -17,7 +17,19 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [otpStep, setOtpStep] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [resendTimer, setResendTimer] = useState(120);
+  const [resending, setResending] = useState(false);
+
   const [form, setForm] = useState({ email: '', password: '', username: '', displayName: '' });
+
+  useEffect(() => {
+    if (otpStep && resendTimer > 0) {
+      const interval = setInterval(() => setResendTimer((t) => t - 1), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [otpStep, resendTimer]);
 
   useEffect(() => {
     if (searchParams.get('tab') === 'register') setTab('register');
@@ -26,6 +38,42 @@ export default function AuthPage() {
   function update(field: string, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
     setError('');
+  }
+
+  async function handleVerifyOTP(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.auth.verifyOTP({ email: form.email, otp });
+      if (res && res.demoUserId) {
+        setDemoUser({
+          id: res.demoUserId,
+          email: res.user?.email || form.email,
+          username: res.user?.username || '',
+          displayName: res.user?.displayName || '',
+        });
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Verification failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    if (resendTimer > 0) return;
+    setResending(true);
+    setError('');
+    try {
+      await api.auth.resendOTP({ email: form.email });
+      setResendTimer(120);
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend OTP');
+    } finally {
+      setResending(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -37,19 +85,46 @@ export default function AuthPage() {
       if (tab === 'register') {
         if (!form.username.trim()) throw new Error('Username is required');
         if (form.username.length < 3) throw new Error('Username must be at least 3 characters');
+        const res = await api.auth.register({
+          email: form.email,
+          password: form.password,
+          username: form.username,
+          displayName: form.displayName
+        });
+        if (res.requiresOtp) {
+          setOtpStep(true);
+        } else if (res && res.demoUserId) {
+          setDemoUser({
+            id: res.demoUserId,
+            email: res.user?.email || form.email,
+            username: res.user?.username || form.username || '',
+            displayName: res.user?.displayName || form.displayName || '',
+          });
+          router.push('/dashboard');
+        }
+      } else {
+        const res = await api.auth.login({
+          email: form.email,
+          password: form.password,
+        });
+        if (res && res.demoUserId) {
+          setDemoUser({
+            id: res.demoUserId,
+            email: res.user?.email || form.email,
+            username: res.user?.username || '',
+            displayName: res.user?.displayName || '',
+          });
+          await api.users.getMe();
+          router.push('/dashboard');
+        }
       }
-
-      const demo = ensureDemoUser({
-        email: form.email,
-        username: form.username || form.email.split('@')[0],
-        displayName: form.displayName || form.username || 'Demo User',
-      });
-
-      setDemoUser(demo);
-      await api.users.getMe();
-      router.push('/dashboard');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } catch (err: any) {
+      if (err.message?.includes('not verified') || err.message?.includes('OTP')) {
+        setOtpStep(true);
+        setError('Please verify your email. A new OTP has been sent.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Something went wrong');
+      }
     } finally {
       setLoading(false);
     }
@@ -117,8 +192,59 @@ export default function AuthPage() {
             </Link>
           </div>
 
-          {/* Tabs */}
-          <div>
+          {otpStep ? (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">Verify your email</h3>
+                <p className="text-gray-500 text-sm mt-1">We've sent a 6-digit code to {form.email}.</p>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium border border-red-100">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleVerifyOTP} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="otp">Verification Code</Label>
+                  <Input
+                    id="otp"
+                    placeholder="123456"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    maxLength={6}
+                    required
+                    className="h-12 text-center tracking-[0.5em] font-mono text-xl"
+                  />
+                </div>
+                <Button type="submit" disabled={loading || otp.length !== 6} className="w-full text-white h-12" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify Account'}
+                </Button>
+                
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendTimer > 0 || resending}
+                    className="text-sm font-medium text-blue-600 disabled:text-gray-400 transition-colors"
+                  >
+                    {resending ? 'Resending...' : resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Resend OTP'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOtpStep(false)}
+                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    Back to login
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <>
+              {/* Tabs */}
+              <div>
             <div className="flex border border-gray-200 rounded-xl p-1 bg-gray-50">
               <button
                 onClick={() => { setTab('login'); setError(''); }}
@@ -144,7 +270,7 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             {tab === 'register' && (
               <>
                 <div className="space-y-1.5">
@@ -156,6 +282,7 @@ export default function AuthPage() {
                     onChange={(e) => update('username', e.target.value)}
                     required
                     className="h-11"
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -166,6 +293,7 @@ export default function AuthPage() {
                     value={form.displayName}
                     onChange={(e) => update('displayName', e.target.value)}
                     className="h-11"
+                    autoComplete="off"
                   />
                 </div>
               </>
@@ -181,6 +309,7 @@ export default function AuthPage() {
                 onChange={(e) => update('email', e.target.value)}
                 required
                 className="h-11"
+                autoComplete="off"
               />
             </div>
 
@@ -195,6 +324,7 @@ export default function AuthPage() {
                   onChange={(e) => update('password', e.target.value)}
                   required
                   className="h-11 pr-10"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
@@ -237,6 +367,8 @@ export default function AuthPage() {
               </>
             )}
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>

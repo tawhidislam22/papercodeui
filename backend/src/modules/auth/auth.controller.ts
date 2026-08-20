@@ -11,6 +11,16 @@ export async function login(req: Request, res: Response) {
   return res.status(200).json(result);
 }
 
+export async function verifyOTP(req: Request, res: Response) {
+  const result = await authService.verifyOTP(req.body);
+  return res.status(200).json(result);
+}
+
+export async function resendOTP(req: Request, res: Response) {
+  const result = await authService.resendOTP(req.body);
+  return res.status(200).json(result);
+}
+
 export async function logout(_req: Request, res: Response) {
   await authService.logout();
   return res.status(204).send();

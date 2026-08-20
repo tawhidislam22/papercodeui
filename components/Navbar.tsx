@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Code as Code2, LayoutDashboard, BookOpen, Upload, BookMarked, Trophy, LogOut, User, Menu, X, Zap, Flame, ChevronDown } from 'lucide-react';
+import { Code as Code2, LayoutDashboard, BookOpen, Upload, BookMarked, Trophy, LogOut, User, Menu, X, Zap, Flame, ChevronDown, Home, Mail } from 'lucide-react';
 import { api, clearDemoUser, getDemoUser, type Profile, getLevelFromXP } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,12 +12,20 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
-const NAV_ITEMS = [
+const STUDENT_NAV_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/lessons', icon: BookOpen, label: 'Lessons' },
   { href: '/upload', icon: Upload, label: 'Upload Code' },
   { href: '/blogs', icon: BookMarked, label: 'Blog' },
   { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
+];
+
+const PUBLIC_NAV_ITEMS = [
+  { href: '/', icon: Home, label: 'Home' },
+  { href: '/blogs', icon: BookMarked, label: 'Blog' },
+  { href: '/pricing', icon: Flame, label: 'Pricing' },
+  { href: '/about', icon: User, label: 'About' },
+  { href: '/contact', icon: Mail, label: 'Contact' },
 ];
 
 export default function Navbar() {
@@ -40,13 +48,14 @@ export default function Navbar() {
   }
 
   const level = profile ? getLevelFromXP(profile.xp) : 1;
+  const activeNavItems = profile ? STUDENT_NAV_ITEMS : PUBLIC_NAV_ITEMS;
 
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 h-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
               <Code2 className="w-4 h-4 text-white" />
             </div>
@@ -55,8 +64,8 @@ export default function Navbar() {
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + '/');
+            {activeNavItems.map((item) => {
+              const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href + '/'));
               return (
                 <Link
                   key={item.href}
@@ -153,7 +162,7 @@ export default function Navbar() {
           <div className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
           <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-lg">
             <div className="p-4 space-y-1">
-              {NAV_ITEMS.map((item) => {
+              {activeNavItems.map((item) => {
                 const active = pathname === item.href;
                 return (
                   <Link
