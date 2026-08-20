@@ -6,6 +6,7 @@ import { adminApi, type AdminUser, type Certificate } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'bg-red-50 text-red-700 border-red-100',
@@ -34,15 +35,21 @@ export default function AdminUsersPage() {
   useEffect(() => { load(); }, [load]);
 
   async function toggleRole(user: AdminUser) {
-    const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
-    await adminApi.users.update(user.id, { role: newRole });
-    load();
+    try {
+      const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
+      await adminApi.users.update(user.id, { role: newRole });
+      toast.success(`Role updated to ${newRole}`);
+      load();
+    } catch { toast.error('Failed to update role'); }
   }
 
   async function removeUser(id: string) {
     if (!confirm('Are you sure you want to delete this user?')) return;
-    await adminApi.users.remove(id);
-    load();
+    try {
+      await adminApi.users.remove(id);
+      toast.success('User deleted');
+      load();
+    } catch { toast.error('Failed to delete user'); }
   }
 
   async function openCertModal(user: AdminUser) {
@@ -60,21 +67,25 @@ export default function AdminUsersPage() {
     setIssuing(true);
     try {
       await adminApi.certificates.issue({ userId: certUser.id, title: certTitle.trim(), description: certDesc.trim() });
+      toast.success('Certificate issued');
       setCertTitle('');
       setCertDesc('');
       const certs = await adminApi.certificates.listForUser(certUser.id);
       setUserCerts(certs);
-    } catch (e) { console.error(e); }
+    } catch (e) { toast.error('Failed to issue certificate'); }
     finally { setIssuing(false); }
   }
 
   async function revokeCert(id: string) {
     if (!confirm('Revoke this certificate?')) return;
-    await adminApi.certificates.revoke(id);
-    if (certUser) {
-      const certs = await adminApi.certificates.listForUser(certUser.id);
-      setUserCerts(certs);
-    }
+    try {
+      await adminApi.certificates.revoke(id);
+      toast.success('Certificate revoked');
+      if (certUser) {
+        const certs = await adminApi.certificates.listForUser(certUser.id);
+        setUserCerts(certs);
+      }
+    } catch { toast.error('Failed to revoke certificate'); }
   }
 
   const filtered = users.filter(

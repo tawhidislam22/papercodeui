@@ -7,6 +7,7 @@ import { ArrowLeft, BookOpen, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { api, getDemoUser } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { LessonSidebar } from '@/components/lessons/LessonSidebar';
 import { ChapterRow } from '@/components/lessons/ChapterRow';
 
@@ -90,8 +91,10 @@ export default function LessonDetailPage() {
                 try {
                   const res = await api.bookmarks.toggleLesson(lesson.id);
                   setBookmarked(res.bookmarked);
+                  toast.success(res.bookmarked ? 'Lesson saved' : 'Lesson removed from saved');
                 } catch (e) {
                   console.error(e);
+                  toast.error('Failed to update saved lessons');
                 }
               }}
               className={`rounded-2xl gap-2 ${bookmarked ? 'border-blue-200 bg-blue-50 text-blue-600' : ''}`}

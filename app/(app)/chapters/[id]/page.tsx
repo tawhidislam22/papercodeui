@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Lock, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { TheoryBlock } from '@/components/lessons/blocks/TheoryBlock';
@@ -175,8 +176,10 @@ export default function ChapterLearningPage() {
                     onClick={async () => {
                       try {
                         await api.progress.completeChapter(chapter.id, { lessonId: chapter.lessonId });
+                        toast.success('Chapter completed!');
                       } catch (err) {
                         console.error(err);
+                        toast.error('Failed to complete chapter');
                       }
                       window.location.href = nextChapterId ? `/chapters/${nextChapterId}` : `/lessons/${chapter.lesson.slug}`;
                     }}

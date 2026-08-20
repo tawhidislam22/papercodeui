@@ -5,6 +5,8 @@ import { Trophy, Award, Search, Trash2 } from 'lucide-react';
 import { adminApi, type LeaderboardUser, type Certificate } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { getLevelFromXP } from '@/lib/api';
 
@@ -34,16 +36,24 @@ export default function AdminLeaderboardPage() {
     setIssuing(true);
     try {
       await adminApi.certificates.issue({ userId, title: certTitle.trim(), description: certDesc.trim() });
+      toast.success('Certificate issued successfully');
       setCertUserId(null); setCertTitle(''); setCertDesc('');
       load();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      toast.error('Failed to issue certificate');
+    }
     finally { setIssuing(false); }
   }
 
   async function revokeCert(id: string) {
     if (!confirm('Revoke this certificate?')) return;
-    await adminApi.certificates.revoke(id);
-    load();
+    try {
+      await adminApi.certificates.revoke(id);
+      toast.success('Certificate revoked');
+      load();
+    } catch (e) {
+      toast.error('Failed to revoke certificate');
+    }
   }
 
   const filtered = users.filter(u =>

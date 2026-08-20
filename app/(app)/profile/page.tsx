@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -36,10 +37,13 @@ export default function ProfilePage() {
   async function save() {
     if (!profile) return;
     setSaving(true);
-    const data = await api.users.updateMe({ displayName: form.display_name, bio: form.bio });
-    if (data) setProfile(data);
-    setSaving(false);
-    setEditing(false);
+    try {
+      const data = await api.users.updateMe({ displayName: form.display_name, bio: form.bio });
+      if (data) setProfile(data);
+      toast.success('Profile updated');
+      setEditing(false);
+    } catch { toast.error('Failed to update profile'); }
+    finally { setSaving(false); }
   }
 
   if (loading) {

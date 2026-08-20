@@ -6,7 +6,9 @@ import { Plus, Trash2, Eye, EyeOff, Search, BookOpen, ChevronRight, GripVertical
 import { adminApi, type AdminLesson, type AdminLanguage } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default function AdminLessonsPage() {
   const [lessons, setLessons] = useState<AdminLesson[]>([]);
@@ -40,13 +42,30 @@ export default function AdminLessonsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function togglePublish(lesson: AdminLesson) { await adminApi.lessons.update(lesson.id, { isPublished: !lesson.isPublished }); load(); }
-  async function removeLesson(id: string) { if (!confirm('Delete this lesson and all its chapters?')) return; await adminApi.lessons.remove(id); load(); }
+  async function togglePublish(lesson: AdminLesson) {
+    try {
+      await adminApi.lessons.update(lesson.id, { isPublished: !lesson.isPublished });
+      toast.success(lesson.isPublished ? 'Lesson unpublished' : 'Lesson published');
+      load();
+    } catch { toast.error('Failed to update lesson'); }
+  }
+
+  async function removeLesson(id: string) {
+    if (!confirm('Delete this lesson and all its chapters?')) return;
+    try {
+      await adminApi.lessons.remove(id);
+      toast.success('Lesson deleted');
+      load();
+    } catch { toast.error('Failed to delete lesson'); }
+  }
+
   async function moveLesson(index: number, direction: 'up' | 'down') {
     const si = direction === 'up' ? index - 1 : index + 1;
     if (si < 0 || si >= filtered.length) return;
-    await adminApi.lessons.reorder([{ id: filtered[index].id, sortOrder: filtered[si].sortOrder }, { id: filtered[si].id, sortOrder: filtered[index].sortOrder }]);
-    load();
+    try {
+      await adminApi.lessons.reorder([{ id: filtered[index].id, sortOrder: filtered[si].sortOrder }, { id: filtered[si].id, sortOrder: filtered[index].sortOrder }]);
+      load();
+    } catch { toast.error('Failed to reorder lessons'); }
   }
   
   async function createLesson() {
@@ -62,8 +81,9 @@ export default function AdminLessonsPage() {
         xpReward: newXp,
         sortOrder: lessons.length 
       }); 
+      toast.success('Lesson created');
       setNewTitle(''); setNewDesc(''); setNewMinutes(30); setNewXp(100); setShowCreate(false); load(); 
-    } catch (e) { console.error(e); } finally { setCreating(false); }
+    } catch (e) { toast.error('Failed to create lesson'); } finally { setCreating(false); }
   }
 
   function startEdit(lesson: AdminLesson) {
@@ -78,16 +98,19 @@ export default function AdminLessonsPage() {
 
   async function saveEdit() {
     if (!editingId || !editTitle.trim() || !editLangId) return;
-    await adminApi.lessons.update(editingId, { 
-      title: editTitle.trim(), 
-      description: editDesc.trim(),
-      languageId: editLangId,
-      difficulty: editDifficulty,
-      estimatedMinutes: editMinutes, 
-      xpReward: editXp 
-    });
-    setEditingId(null);
-    load();
+    try {
+      await adminApi.lessons.update(editingId, { 
+        title: editTitle.trim(), 
+        description: editDesc.trim(),
+        languageId: editLangId,
+        difficulty: editDifficulty,
+        estimatedMinutes: editMinutes, 
+        xpReward: editXp 
+      });
+      toast.success('Lesson updated');
+      setEditingId(null);
+      load();
+    } catch { toast.error('Failed to update lesson'); }
   }
 
   const filtered = lessons.filter((l) => langFilter === 'all' || l.languageId === langFilter).filter((l) => l.title.toLowerCase().includes(search.toLowerCase()));

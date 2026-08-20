@@ -8,6 +8,7 @@ import { adminApi, type AdminChapter, type AdminLesson } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default function AdminLessonChaptersPage() {
   const { id: lessonId } = useParams<{ id: string }>();
@@ -38,7 +39,11 @@ export default function AdminLessonChaptersPage() {
   async function createChapter() {
     if (!newTitle.trim()) return;
     setCreating(true);
-    try { await adminApi.chapters.create({ lessonId, title: newTitle.trim(), description: newDesc.trim(), estimatedMinutes: newMinutes, xpReward: newXp, sortOrder: chapters.length }); setNewTitle(''); setNewDesc(''); setNewMinutes(10); setNewXp(50); setShowCreate(false); load(); } finally { setCreating(false); }
+    try { 
+      await adminApi.chapters.create({ lessonId, title: newTitle.trim(), description: newDesc.trim(), estimatedMinutes: newMinutes, xpReward: newXp, sortOrder: chapters.length }); 
+      toast.success('Chapter created');
+      setNewTitle(''); setNewDesc(''); setNewMinutes(10); setNewXp(50); setShowCreate(false); load(); 
+    } catch { toast.error('Failed to create chapter'); } finally { setCreating(false); }
   }
 
   function startEdit(ch: AdminChapter) {
@@ -51,18 +56,38 @@ export default function AdminLessonChaptersPage() {
 
   async function saveEdit() {
     if (!editingId || !editTitle.trim()) return;
-    await adminApi.chapters.update(editingId, { title: editTitle.trim(), description: editDesc.trim(), estimatedMinutes: editMinutes, xpReward: editXp });
-    setEditingId(null);
-    load();
+    try {
+      await adminApi.chapters.update(editingId, { title: editTitle.trim(), description: editDesc.trim(), estimatedMinutes: editMinutes, xpReward: editXp });
+      toast.success('Chapter updated');
+      setEditingId(null);
+      load();
+    } catch { toast.error('Failed to update chapter'); }
   }
 
-  async function togglePublish(ch: AdminChapter) { await adminApi.chapters.update(ch.id, { isPublished: !ch.isPublished }); load(); }
-  async function removeChapter(id: string) { if (!confirm('Delete this chapter and all its blocks?')) return; await adminApi.chapters.remove(id); load(); }
+  async function togglePublish(ch: AdminChapter) { 
+    try {
+      await adminApi.chapters.update(ch.id, { isPublished: !ch.isPublished }); 
+      toast.success(ch.isPublished ? 'Chapter unpublished' : 'Chapter published');
+      load(); 
+    } catch { toast.error('Failed to update chapter'); }
+  }
+
+  async function removeChapter(id: string) { 
+    if (!confirm('Delete this chapter and all its blocks?')) return; 
+    try {
+      await adminApi.chapters.remove(id); 
+      toast.success('Chapter deleted');
+      load(); 
+    } catch { toast.error('Failed to delete chapter'); }
+  }
+
   async function moveChapter(index: number, direction: 'up' | 'down') {
     const si = direction === 'up' ? index - 1 : index + 1;
     if (si < 0 || si >= chapters.length) return;
-    await adminApi.chapters.reorder([{ id: chapters[index].id, sortOrder: chapters[si].sortOrder }, { id: chapters[si].id, sortOrder: chapters[index].sortOrder }]);
-    load();
+    try {
+      await adminApi.chapters.reorder([{ id: chapters[index].id, sortOrder: chapters[si].sortOrder }, { id: chapters[si].id, sortOrder: chapters[index].sortOrder }]);
+      load();
+    } catch { toast.error('Failed to reorder chapters'); }
   }
 
   return (

@@ -8,6 +8,8 @@ import { adminApi, type AdminBlock } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const TYPE_CONFIG = {
   THEORY: { icon: FileText, color: 'bg-blue-50 text-blue-600 border-blue-100', label: 'Theory' },
@@ -59,12 +61,14 @@ export default function AdminBlocksPage() {
       
       if (editingBlockId) {
         await adminApi.blocks.update(editingBlockId, data);
+        toast.success('Block updated');
       } else {
         await adminApi.blocks.create(data);
+        toast.success('Block created');
       }
       resetForm();
       load();
-    } finally { setCreating(false); }
+    } catch { toast.error('Failed to save block'); } finally { setCreating(false); }
   }
 
   function startEdit(block: AdminBlock) {
@@ -95,12 +99,22 @@ export default function AdminBlocksPage() {
     setCodingQuestion(''); setCodingStarter(''); setCodingExpected(''); setCodingHints(''); setShowCreate(false);
   }
 
-  async function removeBlock(id: string) { if (!confirm('Delete this block?')) return; await adminApi.blocks.remove(id); load(); }
+  async function removeBlock(id: string) { 
+    if (!confirm('Delete this block?')) return; 
+    try {
+      await adminApi.blocks.remove(id); 
+      toast.success('Block deleted');
+      load(); 
+    } catch { toast.error('Failed to delete block'); }
+  }
+
   async function moveBlock(index: number, dir: 'up' | 'down') {
     const si = dir === 'up' ? index - 1 : index + 1;
     if (si < 0 || si >= blocks.length) return;
-    await Promise.all([adminApi.blocks.update(blocks[index].id, { sortOrder: blocks[si].sortOrder }), adminApi.blocks.update(blocks[si].id, { sortOrder: blocks[index].sortOrder })]);
-    load();
+    try {
+      await Promise.all([adminApi.blocks.update(blocks[index].id, { sortOrder: blocks[si].sortOrder }), adminApi.blocks.update(blocks[si].id, { sortOrder: blocks[index].sortOrder })]);
+      load();
+    } catch { toast.error('Failed to reorder blocks'); }
   }
 
   return (

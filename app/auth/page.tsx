@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api, setDemoUser } from '@/lib/api';
+import { toast } from 'sonner';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -53,10 +54,12 @@ export default function AuthPage() {
           username: res.user?.username || '',
           displayName: res.user?.displayName || '',
         });
+        toast.success('Successfully verified!');
         router.push('/dashboard');
       }
     } catch (err: any) {
       setError(err.message || 'Verification failed');
+      toast.error('Verification failed');
     } finally {
       setLoading(false);
     }
@@ -69,8 +72,10 @@ export default function AuthPage() {
     try {
       await api.auth.resendOTP({ email: form.email });
       setResendTimer(120);
+      toast.success('OTP sent successfully');
     } catch (err: any) {
       setError(err.message || 'Failed to resend OTP');
+      toast.error('Failed to resend OTP');
     } finally {
       setResending(false);
     }
@@ -93,6 +98,7 @@ export default function AuthPage() {
         });
         if (res.requiresOtp) {
           setOtpStep(true);
+          toast.success('OTP sent to your email');
         } else if (res && res.demoUserId) {
           setDemoUser({
             id: res.demoUserId,
@@ -100,6 +106,7 @@ export default function AuthPage() {
             username: res.user?.username || form.username || '',
             displayName: res.user?.displayName || form.displayName || '',
           });
+          toast.success('Registration successful');
           router.push('/dashboard');
         }
       } else {
@@ -115,6 +122,7 @@ export default function AuthPage() {
             displayName: res.user?.displayName || '',
           });
           await api.users.getMe();
+          toast.success('Login successful');
           router.push('/dashboard');
         }
       }
@@ -122,8 +130,10 @@ export default function AuthPage() {
       if (err.message?.includes('not verified') || err.message?.includes('OTP')) {
         setOtpStep(true);
         setError('Please verify your email. A new OTP has been sent.');
+        toast.info('Please verify your email');
       } else {
         setError(err instanceof Error ? err.message : 'Something went wrong');
+        toast.error(err instanceof Error ? err.message : 'Something went wrong');
       }
     } finally {
       setLoading(false);
