@@ -17,10 +17,14 @@ export default function AdminLessonChaptersPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newMinutes, setNewMinutes] = useState(10);
+  const [newXp, setNewXp] = useState(50);
   const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [editMinutes, setEditMinutes] = useState(10);
+  const [editXp, setEditXp] = useState(50);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -34,18 +38,20 @@ export default function AdminLessonChaptersPage() {
   async function createChapter() {
     if (!newTitle.trim()) return;
     setCreating(true);
-    try { await adminApi.chapters.create({ lessonId, title: newTitle.trim(), description: newDesc.trim(), sortOrder: chapters.length }); setNewTitle(''); setNewDesc(''); setShowCreate(false); load(); } finally { setCreating(false); }
+    try { await adminApi.chapters.create({ lessonId, title: newTitle.trim(), description: newDesc.trim(), estimatedMinutes: newMinutes, xpReward: newXp, sortOrder: chapters.length }); setNewTitle(''); setNewDesc(''); setNewMinutes(10); setNewXp(50); setShowCreate(false); load(); } finally { setCreating(false); }
   }
 
   function startEdit(ch: AdminChapter) {
     setEditingId(ch.id);
     setEditTitle(ch.title);
     setEditDesc(ch.description || '');
+    setEditMinutes(ch.estimatedMinutes);
+    setEditXp(ch.xpReward);
   }
 
   async function saveEdit() {
     if (!editingId || !editTitle.trim()) return;
-    await adminApi.chapters.update(editingId, { title: editTitle.trim(), description: editDesc.trim() });
+    await adminApi.chapters.update(editingId, { title: editTitle.trim(), description: editDesc.trim(), estimatedMinutes: editMinutes, xpReward: editXp });
     setEditingId(null);
     load();
   }
@@ -70,6 +76,16 @@ export default function AdminLessonChaptersPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6 shadow-sm space-y-4">
           <h3 className="font-semibold text-gray-900">New Chapter</h3>
           <div className="grid sm:grid-cols-2 gap-3"><Input placeholder="Chapter title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="rounded-xl" /><Input placeholder="Description (optional)" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="rounded-xl" /></div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 whitespace-nowrap">Time (min):</span>
+              <Input type="number" min="1" value={newMinutes} onChange={(e) => setNewMinutes(parseInt(e.target.value) || 0)} className="rounded-xl w-24" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 whitespace-nowrap">XP Reward:</span>
+              <Input type="number" min="0" value={newXp} onChange={(e) => setNewXp(parseInt(e.target.value) || 0)} className="rounded-xl w-24" />
+            </div>
+          </div>
           <div className="flex gap-2"><Button onClick={createChapter} disabled={creating || !newTitle.trim()} className="rounded-xl">{creating ? 'Creating...' : 'Create Chapter'}</Button><Button variant="outline" onClick={() => setShowCreate(false)} className="rounded-xl">Cancel</Button></div>
         </div>
       )}
@@ -79,11 +95,24 @@ export default function AdminLessonChaptersPage() {
         ) : chapters.map((ch, index) => (
           editingId === ch.id ? (
             <div key={ch.id} className="bg-white rounded-2xl border border-blue-200 p-4 shadow-sm space-y-3">
-              <div className="flex items-center gap-3">
-                <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="rounded-xl flex-1" placeholder="Chapter title" />
-                <Input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="rounded-xl flex-1" placeholder="Description" />
-                <Button onClick={saveEdit} className="rounded-xl whitespace-nowrap bg-emerald-600 hover:bg-emerald-700">Save</Button>
-                <Button variant="outline" onClick={() => setEditingId(null)} className="rounded-xl">Cancel</Button>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="rounded-xl flex-1" placeholder="Chapter title" />
+                  <Input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="rounded-xl flex-1" placeholder="Description" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 whitespace-nowrap">Time (min):</span>
+                    <Input type="number" min="1" value={editMinutes} onChange={(e) => setEditMinutes(parseInt(e.target.value) || 0)} className="rounded-xl w-24" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 whitespace-nowrap">XP:</span>
+                    <Input type="number" min="0" value={editXp} onChange={(e) => setEditXp(parseInt(e.target.value) || 0)} className="rounded-xl w-24" />
+                  </div>
+                  <div className="flex-1" />
+                  <Button onClick={saveEdit} className="rounded-xl whitespace-nowrap bg-emerald-600 hover:bg-emerald-700">Save</Button>
+                  <Button variant="outline" onClick={() => setEditingId(null)} className="rounded-xl">Cancel</Button>
+                </div>
               </div>
             </div>
           ) : (
