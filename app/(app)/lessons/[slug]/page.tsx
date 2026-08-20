@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
 import { ArrowLeft, BookOpen, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
