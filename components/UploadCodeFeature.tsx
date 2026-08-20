@@ -234,7 +234,13 @@ function CameraModal({
 
 // ─── Upload Page ─────────────────────────────────────────────────────────────
 
-export default function UploadPage() {
+export function UploadCodeFeature({ 
+  backHref = '/', 
+  backLabel = 'Home' 
+}: { 
+  backHref?: string; 
+  backLabel?: string; 
+}) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [code, setCode] = useState('');
@@ -248,9 +254,8 @@ export default function UploadPage() {
 
   const handleImageUpload = useCallback(
     async (file: File) => {
-      if (!file.type.startsWith('image/')) return;
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
+      setCameraOpen(false);
+      setPreviewUrl(URL.createObjectURL(file));
 
       const extracted = await extractor.extractFromFile(file);
       if (extracted) {
@@ -260,13 +265,14 @@ export default function UploadPage() {
     [extractor]
   );
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) handleImageUpload(file);
-  }
-
-  // ─── Run code ─────────────────────────────────────────────────────────
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        handleImageUpload(e.target.files[0]);
+      }
+    },
+    [handleImageUpload]
+  );
 
   async function handleRun() {
     if (!code.trim()) return;
@@ -275,6 +281,12 @@ export default function UploadPage() {
   }
 
   const canRun = code.trim().length > 0 && !executor.isRunning && !extractor.isExtracting;
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleImageUpload(file);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -288,10 +300,10 @@ export default function UploadPage() {
 
       {/* Breadcrumb */}
       <Link
-        href="/dashboard"
+        href={backHref}
         className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-900 text-sm font-medium mb-6 transition-colors"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        <ArrowLeft className="w-4 h-4" /> {backLabel}
       </Link>
 
       {/* ── Page header card ── */}

@@ -47,7 +47,7 @@ export default function Sidebar() {
 
   const NAV_ITEMS = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', adminOnly: true, exact: true },
-    { href: '/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
+    { href: '/dashboard/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
     { href: '/admin/leaderboard', icon: Trophy, label: 'Leaderboard', adminOnly: true },
     { href: '/admin/users', icon: Users, label: 'Users', adminOnly: true },
     { href: '/admin/blogs', icon: BookMarked, label: 'Blogs', adminOnly: true },
@@ -56,10 +56,11 @@ export default function Sidebar() {
 
   const userItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', adminOnly: false, exact: true },
+    { href: '/dashboard/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
     { href: '/lessons', icon: BookOpen, label: 'Lessons', adminOnly: false },
-    { href: '/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
     { href: '/blogs', icon: BookMarked, label: 'Blog', adminOnly: false },
     { href: '/leaderboard', icon: Trophy, label: 'Leaderboard', adminOnly: false },
+    { href: '/profile', icon: User, label: 'Profile', adminOnly: false },
   ];
 
   const items = isAdmin ? NAV_ITEMS : userItems;

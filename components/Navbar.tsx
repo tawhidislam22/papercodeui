@@ -12,17 +12,10 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
-const STUDENT_NAV_ITEMS = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/lessons', icon: BookOpen, label: 'Lessons' },
-  { href: '/upload', icon: Upload, label: 'Upload Code' },
-  { href: '/blogs', icon: BookMarked, label: 'Blog' },
-  { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
-];
-
 const PUBLIC_NAV_ITEMS = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/blogs', icon: BookMarked, label: 'Blog' },
+  { href: '/upload', icon: Upload, label: 'Upload Code' },
   { href: '/pricing', icon: Flame, label: 'Pricing' },
   { href: '/about', icon: User, label: 'About' },
   { href: '/contact', icon: Mail, label: 'Contact' },
@@ -48,7 +41,7 @@ export default function Navbar() {
   }
 
   const level = profile ? getLevelFromXP(profile.xp) : 1;
-  const activeNavItems = profile ? STUDENT_NAV_ITEMS : PUBLIC_NAV_ITEMS;
+  const activeNavItems = PUBLIC_NAV_ITEMS;
 
   return (
     <>
@@ -85,58 +78,62 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            {profile && (
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-amber-100">
-                  <Flame className="w-3.5 h-3.5" />
-                  {profile.streak}d
-                </div>
-                <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-100">
-                  <Zap className="w-3.5 h-3.5" />
-                  {profile.xp} XP
-                </div>
-              </div>
-            )}
-
             {profile ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-gray-50 transition-colors">
-                    <Avatar className="w-7 h-7">
-                      <AvatarImage src={profile.avatarUrl} />
-                      <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-bold">
-                        {(profile.displayName || profile.username).charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="hidden sm:flex flex-col items-start">
-                      <span className="text-xs font-semibold text-gray-900 leading-none">{profile.displayName || profile.username}</span>
-                      <span className="text-xs text-gray-400">Level {level}</span>
+              <>
+                <Link href="/dashboard" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-900 transition-colors">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-gray-50 transition-colors">
+                      <Avatar className="w-7 h-7">
+                        <AvatarImage src={profile.avatarUrl} />
+                        <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-bold">
+                          {(profile.displayName || profile.username).charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="hidden sm:flex flex-col items-start">
+                        <span className="text-xs font-semibold text-gray-900 leading-none">{profile.displayName || profile.username}</span>
+                        <span className="text-xs text-gray-400">Level {level}</span>
+                      </div>
+                      <ChevronDown className="w-3 h-3 text-gray-400" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="flex items-center justify-between px-2 py-2 mb-1 bg-gray-50 rounded-md">
+                      <div className="flex items-center gap-1.5 text-amber-700 text-xs font-semibold">
+                        <Flame className="w-3.5 h-3.5" />
+                        {profile.streak}d
+                      </div>
+                      <div className="flex items-center gap-1.5 text-blue-700 text-xs font-semibold">
+                        <Zap className="w-3.5 h-3.5" />
+                        {profile.xp} XP
+                      </div>
                     </div>
-                    <ChevronDown className="w-3 h-3 text-gray-400" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {profile.role === 'ADMIN' && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="flex items-center gap-2">
-                          <LayoutDashboard className="w-4 h-4" /> Admin Panel
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="flex items-center gap-2">
-                      <User className="w-4 h-4" /> Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut} className="text-red-600 focus:text-red-600">
-                    <LogOut className="w-4 h-4 mr-2" /> Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuSeparator />
+                    {profile.role === 'ADMIN' && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin" className="flex items-center gap-2">
+                            <LayoutDashboard className="w-4 h-4" /> Admin Panel
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center gap-2">
+                        <User className="w-4 h-4" /> Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut} className="text-red-600 focus:text-red-600">
+                      <LogOut className="w-4 h-4 mr-2" /> Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <Link href="/auth">
                 <Button size="sm" className="text-white" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>

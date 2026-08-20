@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Tesseract from 'tesseract.js';
 
 interface ExtractorState {
   code: string;
@@ -24,25 +25,18 @@ export function useCodeExtractor(): UseCodeExtractorReturn {
     setState((prev) => ({ ...prev, isExtracting: true, error: null }));
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
+      const result = await Tesseract.recognize(
+        file,
+        'eng',
+        { logger: (m) => console.log('Tesseract:', m) }
+      );
 
-      const res = await fetch('/api/extract-code', {
-        method: 'POST',
-        body: formData,
-      });
+      // Strip any residual whitespace
+      const clean = result.data.text.trim();
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error ?? `Extraction failed (${res.status})`);
+      if (!clean) {
+        throw new Error('No text found in image');
       }
-
-      // Strip any residual markdown fences just in case
-      const clean = (data.code as string)
-        .replace(/^```[\w]*\n?/gm, '')
-        .replace(/```$/gm, '')
-        .trim();
 
       setState({ code: clean, isExtracting: false, error: null });
       return clean;

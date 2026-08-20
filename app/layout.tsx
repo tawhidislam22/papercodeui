@@ -1,9 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Space_Grotesk } from 'next/font/google';
+import NextTopLoader from 'nextjs-toploader';
 import { Providers } from './providers';
-
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Paper Code — Learn Coding by Writing',
@@ -32,7 +30,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={spaceGrotesk.className}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body style={{ fontFamily: '"Space Grotesk", sans-serif' }}>
+        <NextTopLoader
+          color="#2563eb"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #2563eb,0 0 5px #2563eb"
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
