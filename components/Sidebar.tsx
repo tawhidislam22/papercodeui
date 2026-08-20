@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Heart,
+  PenTool,
 } from 'lucide-react';
 import { api, clearDemoUser, getDemoUser, type Profile, getLevelFromXP } from '@/lib/api';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -60,6 +61,7 @@ export default function Sidebar() {
     { href: '/dashboard/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
     { href: '/lessons', icon: BookOpen, label: 'Lessons', adminOnly: false },
     { href: '/blogs', icon: BookMarked, label: 'Blog', adminOnly: false },
+    { href: '/dashboard/my-blogs', icon: PenTool, label: 'My Blogs', adminOnly: false },
     { href: '/favorites', icon: Heart, label: 'Favorites', adminOnly: false },
     { href: '/leaderboard', icon: Trophy, label: 'Leaderboard', adminOnly: false },
     { href: '/profile', icon: User, label: 'Profile', adminOnly: false },
