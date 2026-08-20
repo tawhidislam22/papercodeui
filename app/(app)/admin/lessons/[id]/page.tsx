@@ -94,10 +94,10 @@ export default function AdminLessonChaptersPage() {
               <button onClick={() => moveChapter(index, 'down')} disabled={index === chapters.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-20"><ArrowDown className="w-3.5 h-3.5" /></button>
             </div>
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold shrink-0">{index + 1}</div>
-            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => startEdit(ch)}>
-              <div className="flex items-center gap-2"><p className="font-semibold text-gray-900 truncate hover:text-blue-600 transition-colors">{ch.title}</p><Badge className={ch.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}>{ch.isPublished ? 'Published' : 'Draft'}</Badge></div>
+            <Link href={`/admin/lessons/${lessonId}/chapters/${ch.id}`} className="flex-1 min-w-0 block group cursor-pointer">
+              <div className="flex items-center gap-2"><p className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{ch.title}</p><Badge className={ch.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}>{ch.isPublished ? 'Published' : 'Draft'}</Badge></div>
               <div className="flex items-center gap-3 mt-1 text-xs text-gray-500"><span>{ch._count.blocks} blocks</span><span>·</span><span>{ch.estimatedMinutes} min</span><span>·</span><span>{ch.xpReward} XP</span></div>
-            </div>
+            </Link>
             <div className="flex items-center gap-1 shrink-0">
               <Button size="sm" variant="outline" onClick={() => startEdit(ch)} className="gap-1 text-xs h-8 rounded-lg">Edit</Button>
               <Button size="sm" variant="outline" onClick={() => togglePublish(ch)} className="gap-1 text-xs h-8 rounded-lg">{ch.isPublished ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}</Button>
