@@ -6,10 +6,12 @@ import { adminApi, type AdminBlog } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
 
 import { toast } from 'sonner';
 
 export default function AdminBlogsPage() {
+  const router = useRouter();
   const [blogs, setBlogs] = useState<AdminBlog[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -158,7 +160,7 @@ export default function AdminBlogsPage() {
             : filtered.length === 0 ? (
               <tr><td colSpan={6} className="text-center py-8 text-gray-400"><BookMarked className="w-8 h-8 mx-auto mb-2 opacity-40" /> No blogs found</td></tr>
             ) : filtered.map((blog) => (
-              <tr key={blog.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <tr key={blog.id} onClick={() => router.push(`/blogs/${blog.id}`)} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer">
                 <td className="px-4 py-3"><p className="font-medium text-gray-900 truncate max-w-xs">{blog.title}</p><p className="text-xs text-gray-400 truncate max-w-xs">{blog.excerpt}</p></td>
                 <td className="px-4 py-3 text-gray-600">@{blog.author.username}</td>
                 <td className="px-4 py-3 text-center"><Badge className={blog.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}>{blog.isPublished ? 'Published' : 'Draft'}</Badge></td>
@@ -166,8 +168,8 @@ export default function AdminBlogsPage() {
                 <td className="px-4 py-3 text-center text-gray-600">{blog.likesCount}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={() => togglePublish(blog)} className="gap-1 text-xs h-8 rounded-lg">{blog.isPublished ? <><EyeOff className="w-3 h-3" /> Unpublish</> : <><Eye className="w-3 h-3" /> Publish</>}</Button>
-                    <Button size="sm" variant="outline" onClick={() => removeBlog(blog.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); togglePublish(blog); }} className="gap-1 text-xs h-8 rounded-lg">{blog.isPublished ? <><EyeOff className="w-3 h-3" /> Unpublish</> : <><Eye className="w-3 h-3" /> Publish</>}</Button>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); removeBlog(blog.id); }} className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button>
                   </div>
                 </td>
               </tr>
