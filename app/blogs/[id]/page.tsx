@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 export default function BlogPostPage() {
   const { id } = useParams<{ id: string }>();
   const [blog, setBlog] = useState<(Partial<Blog> & { author?: string; authorInitial?: string; content?: string; authorProfile?: Profile | null }) | null>(null);
-  const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -124,19 +123,6 @@ export default function BlogPostPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setLiked(!liked)}
-            className={`gap-2 ${liked ? 'border-red-200 bg-red-50 text-red-600' : ''}`}
-          >
-            <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
-            {(blog.likesCount ?? 0) + (liked ? 1 : 0)}
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <MessageCircle className="w-4 h-4" />
-            {blog.commentsCount ?? 0}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={async () => {
               const demoUser = getDemoUser();
               if (!demoUser) return;
@@ -147,10 +133,14 @@ export default function BlogPostPage() {
                 console.error(e);
               }
             }}
-            className={`gap-2 ${bookmarked ? 'border-blue-200 bg-blue-50 text-blue-600' : ''}`}
+            className={`gap-2 ${bookmarked ? 'border-red-200 bg-red-50 text-red-600' : ''}`}
           >
-            <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
-            Save
+            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+            {(blog.likesCount ?? 0) + (bookmarked ? 1 : 0)}
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <MessageCircle className="w-4 h-4" />
+            {blog.commentsCount ?? 0}
           </Button>
           <Button variant="outline" size="sm" className="gap-2 ml-auto">
             <Share2 className="w-4 h-4" /> Share
