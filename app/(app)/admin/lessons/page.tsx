@@ -76,10 +76,10 @@ export default function AdminLessonsPage() {
               <GripVertical className="w-3.5 h-3.5 text-gray-300" />
               <button onClick={() => moveLesson(index, 'down')} disabled={index === filtered.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-20"><ArrowDown className="w-3.5 h-3.5" /></button>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2"><p className="font-semibold text-gray-900 truncate">{lesson.title}</p><Badge className={lesson.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}>{lesson.isPublished ? 'Published' : 'Draft'}</Badge></div>
+            <Link href={`/admin/lessons/${lesson.id}`} className="flex-1 min-w-0 block group cursor-pointer">
+              <div className="flex items-center gap-2"><p className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{lesson.title}</p><Badge className={lesson.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}>{lesson.isPublished ? 'Published' : 'Draft'}</Badge></div>
               <div className="flex items-center gap-3 mt-1 text-xs text-gray-500"><span>{lesson.language.name}</span><span>·</span><span>{lesson.difficulty}</span><span>·</span><span>{lesson._count.chapters} chapters</span><span>·</span><span>{lesson.xpReward} XP</span></div>
-            </div>
+            </Link>
             <div className="flex items-center gap-1 shrink-0">
               <Button size="sm" variant="outline" onClick={() => togglePublish(lesson)} className="gap-1 text-xs h-8 rounded-lg">{lesson.isPublished ? <><EyeOff className="w-3 h-3" /> Unpublish</> : <><Eye className="w-3 h-3" /> Publish</>}</Button>
               <Link href={`/admin/lessons/${lesson.id}`}><Button size="sm" variant="outline" className="gap-1 text-xs h-8 rounded-lg">Chapters <ChevronRight className="w-3 h-3" /></Button></Link>
