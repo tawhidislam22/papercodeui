@@ -57,15 +57,20 @@ export default function ChapterLearningPage() {
 
   async function handleCompleteBlock(blockId: string) {
     if (!chapter) return;
-    markCompleted(blockId);
-    await api.progress.completeBlock(chapter.id, { lessonId: chapter.lessonId, blockId });
+    
+    const wasCompleted = completedBlockIds.includes(blockId);
+    
+    if (!wasCompleted) {
+      markCompleted(blockId);
+      api.progress.completeBlock(chapter.id, { lessonId: chapter.lessonId, blockId }).catch(console.error);
+    }
 
     const nextIndex = Math.min(activeIndex + 1, blocks.length - 1);
     setActiveIndex(nextIndex);
     setCurrentBlockId(blocks[nextIndex]?.id);
 
-    if (nextIndex === blocks.length - 1 && blockId === blocks[blocks.length - 1].id) {
-      await api.progress.completeChapter(chapter.id, { lessonId: chapter.lessonId });
+    if (!wasCompleted && nextIndex === blocks.length - 1 && blockId === blocks[blocks.length - 1].id) {
+      api.progress.completeChapter(chapter.id, { lessonId: chapter.lessonId }).catch(console.error);
     }
   }
 
@@ -134,10 +139,26 @@ export default function ChapterLearningPage() {
                 />
               )}
 
-              {activeBlock.type === 'THEORY' && !(activeIndex === blocks.length - 1 && completedBlockIds.includes(activeBlock.id)) && (
+              {activeBlock.type === 'THEORY' && !completedBlockIds.includes(activeBlock.id) && (
                 <div className="mt-4 flex justify-end">
                   <Button onClick={() => handleCompleteBlock(activeBlock.id)} className="rounded-xl">
                     Continue
+                  </Button>
+                </div>
+              )}
+
+              {/* Show Next Block button if completed and not on the last block */}
+              {completedBlockIds.includes(activeBlock.id) && activeIndex < blocks.length - 1 && (
+                <div className="mt-6 flex justify-end pt-4 border-t border-gray-100">
+                  <Button 
+                    onClick={() => {
+                      const nextIndex = activeIndex + 1;
+                      setActiveIndex(nextIndex);
+                      setCurrentBlockId(blocks[nextIndex]?.id);
+                    }} 
+                    className="rounded-xl" variant="secondary"
+                  >
+                    Next Step <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
                   </Button>
                 </div>
               )}
@@ -166,26 +187,35 @@ export default function ChapterLearningPage() {
           <div className="mt-4 space-y-3">
             {blocks.map((block, index) => {
               const isCompleted = completedBlockIds.includes(block.id);
-              const isLocked = index > activeIndex;
+              const isLocked = index > activeIndex && !isCompleted;
               return (
-                <div
+                <button
                   key={block.id}
-                  className={`flex items-center gap-3 rounded-2xl px-3 py-2 border ${
-                    isLocked ? 'border-gray-100 text-gray-400' : 'border-blue-100 text-gray-700'
+                  disabled={isLocked}
+                  onClick={() => {
+                    setActiveIndex(index);
+                    setCurrentBlockId(block.id);
+                  }}
+                  className={`flex w-full text-left items-center gap-3 rounded-2xl px-3 py-2 border transition-all ${
+                    index === activeIndex
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                      : isLocked
+                        ? 'border-gray-100 text-gray-400 bg-gray-50/50 cursor-not-allowed'
+                        : 'border-blue-100 text-gray-700 hover:bg-gray-50 cursor-pointer'
                   }`}
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                   ) : isLocked ? (
-                    <Lock className="h-4 w-4" />
+                    <Lock className="h-4 w-4 shrink-0" />
                   ) : (
-                    <span className="h-2 w-2 rounded-full bg-blue-500" />
+                    <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mx-1" />
                   )}
                   <div className="text-sm">
                     <p className="font-medium">{block.title || block.type}</p>
-                    <p className="text-xs text-gray-400">Block {index + 1}</p>
+                    <p className="text-xs opacity-70">Block {index + 1}</p>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

@@ -62,8 +62,7 @@ export function CodingBlock({
     // Simple "correct" check: if expected output exists and stdout matches
     if (
       output !== null &&
-      challenge.expectedOutput &&
-      output.trim() === challenge.expectedOutput.trim()
+      (!challenge.expectedOutput || output.trim() === challenge.expectedOutput.trim())
     ) {
       onCorrect();
     }
@@ -194,16 +193,16 @@ export function CodingBlock({
           </div>
 
           {/* AI feedback (verdict) */}
-          {executor.output && challenge.expectedOutput && (
+          {executor.output && (
             <div
               className={`rounded-2xl border p-4 text-sm ${
-                executor.output.trim() === challenge.expectedOutput.trim()
+                !challenge.expectedOutput || executor.output.trim() === challenge.expectedOutput.trim()
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                   : 'border-rose-200 bg-rose-50 text-rose-700'
               }`}
             >
-              {executor.output.trim() === challenge.expectedOutput.trim() ? (
-                <p className="font-semibold">✅ Correct output!</p>
+              {!challenge.expectedOutput || executor.output.trim() === challenge.expectedOutput.trim() ? (
+                <p className="font-semibold">✅ Execution successful!</p>
               ) : (
                 <>
                   <p className="font-semibold mb-1">❌ Output mismatch</p>
