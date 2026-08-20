@@ -1,5 +1,6 @@
-const apiBase = process.env.NEXT_PUBLIC_BACKEND_URL
-  ? process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/+$/, '').replace(/\/api$/, '') + '/api'
+const rawApiBase = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+const apiBase = rawApiBase
+  ? (rawApiBase.startsWith('http') ? rawApiBase : `https://${rawApiBase}`).replace(/\/+$/, '').replace(/\/api$/, '') + '/api'
   : '';
 
 function getDemoHeaders(): Record<string, string> {

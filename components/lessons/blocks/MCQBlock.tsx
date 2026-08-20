@@ -10,10 +10,12 @@ export function MCQBlock({
   title,
   question,
   onCorrect,
+  onNext,
 }: {
   title: string;
   question: MCQQuestion;
   onCorrect: () => void;
+  onNext?: () => void;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [validated, setValidated] = useState(false);
@@ -71,6 +73,10 @@ export function MCQBlock({
         <Button
           disabled={selected === null}
           onClick={() => {
+            if (validated && isCorrect) {
+              onNext?.();
+              return;
+            }
             if (validated && !isCorrect) {
               setValidated(false);
               setSelected(null);
@@ -81,9 +87,9 @@ export function MCQBlock({
               onCorrect();
             }
           }}
-          className="rounded-xl"
+          className={`rounded-xl ${validated && isCorrect ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
         >
-          {validated ? (isCorrect ? 'Correct!' : 'Check again') : 'Check answer'}
+          {validated ? (isCorrect ? 'Next Step →' : 'Check again') : 'Check answer'}
         </Button>
       </div>
     </motion.div>

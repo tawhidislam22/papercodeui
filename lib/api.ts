@@ -210,7 +210,10 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
 	: '';
 
 function normalizeApiBase(input: string) {
-	const trimmed = input.replace(/\/+$/, '');
+	let trimmed = input.replace(/\/+$/, '');
+	if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+		trimmed = `https://${trimmed}`;
+	}
 	if (trimmed.endsWith('/api')) return trimmed;
 	return `${trimmed}/api`;
 }

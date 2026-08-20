@@ -124,6 +124,13 @@ export default function ChapterLearningPage() {
                   title={activeBlock.title}
                   question={activeBlock.mcq}
                   onCorrect={() => handleCompleteBlock(activeBlock.id)}
+                  onNext={() => {
+                    if (activeIndex < blocks.length - 1) {
+                      const nextIndex = activeIndex + 1;
+                      setActiveIndex(nextIndex);
+                      setCurrentBlockId(blocks[nextIndex]?.id);
+                    }
+                  }}
                 />
               )}
               {activeBlock.type === 'CODING' && activeBlock.coding && (
@@ -132,6 +139,13 @@ export default function ChapterLearningPage() {
                   challenge={activeBlock.coding}
                   chapterId={chapter.id}
                   onCorrect={() => handleCompleteBlock(activeBlock.id)}
+                  onNext={() => {
+                    if (activeIndex < blocks.length - 1) {
+                      const nextIndex = activeIndex + 1;
+                      setActiveIndex(nextIndex);
+                      setCurrentBlockId(blocks[nextIndex]?.id);
+                    }
+                  }}
                 />
               )}
 
