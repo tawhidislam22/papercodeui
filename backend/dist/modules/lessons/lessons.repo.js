@@ -42,6 +42,8 @@ export const lessonsRepo = {
                 completedChapters,
                 progressPercent,
                 totalEstimatedMinutes: estimatedMinutes,
+                averageRating: lesson.averageRating,
+                reviewsCount: lesson.reviewsCount,
             };
         });
     },
@@ -84,6 +86,8 @@ export const lessonsRepo = {
             isPublished: lesson.isPublished,
             createdAt: lesson.createdAt,
             updatedAt: lesson.updatedAt,
+            averageRating: lesson.averageRating,
+            reviewsCount: lesson.reviewsCount,
             chapters: lesson.chapters.map((chapter) => {
                 const progressEntry = progressByChapter.get(chapter.id);
                 return {

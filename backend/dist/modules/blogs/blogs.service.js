@@ -12,4 +12,19 @@ export const blogsService = {
     update(userId, id, data) {
         return blogsRepo.update(userId, id, data);
     },
+    delete(userId, id) {
+        return blogsRepo.delete(userId, id);
+    },
+    listMyBlogs(userId) {
+        return blogsRepo.listMyBlogs(userId);
+    },
+    getComments(blogId) {
+        return blogsRepo.getComments(blogId);
+    },
+    addComment(blogId, userId, content, parentId) {
+        return blogsRepo.addComment(blogId, userId, content, parentId);
+    },
+    deleteComment(blogId, commentId, userId) {
+        return blogsRepo.deleteComment(blogId, commentId, userId);
+    }
 };

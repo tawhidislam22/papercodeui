@@ -201,6 +201,7 @@ type DemoUser = {
 	email: string;
 	username: string;
 	displayName: string;
+	role?: string;
 };
 
 const DEMO_USER_KEY = 'papercode.demoUser';

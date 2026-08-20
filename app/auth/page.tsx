@@ -53,9 +53,10 @@ export default function AuthPage() {
           email: res.user?.email || form.email,
           username: res.user?.username || '',
           displayName: res.user?.displayName || '',
+          role: res.user?.role || 'USER',
         });
         toast.success('Successfully verified!');
-        router.push('/dashboard');
+        router.push(res.user?.role === 'ADMIN' ? '/admin' : '/dashboard');
       }
     } catch (err: any) {
       setError(err.message || 'Verification failed');
@@ -105,9 +106,10 @@ export default function AuthPage() {
             email: res.user?.email || form.email,
             username: res.user?.username || form.username || '',
             displayName: res.user?.displayName || form.displayName || '',
+            role: res.user?.role || 'USER',
           });
           toast.success('Registration successful');
-          router.push('/dashboard');
+          router.push(res.user?.role === 'ADMIN' ? '/admin' : '/dashboard');
         }
       } else {
         const res = await api.auth.login({
@@ -120,10 +122,21 @@ export default function AuthPage() {
             email: res.user?.email || form.email,
             username: res.user?.username || '',
             displayName: res.user?.displayName || '',
+            role: res.user?.role || 'USER',
           });
-          await api.users.getMe();
+          // Fetch profile to get latest role
+          const profile = await api.users.getMe();
+          const userRole = profile?.role || res.user?.role || 'USER';
+          // Update localStorage with real role
+          setDemoUser({
+            id: res.demoUserId,
+            email: profile?.email || res.user?.email || form.email,
+            username: profile?.username || res.user?.username || '',
+            displayName: profile?.displayName || res.user?.displayName || '',
+            role: userRole,
+          });
           toast.success('Login successful');
-          router.push('/dashboard');
+          router.push(userRole === 'ADMIN' ? '/admin' : '/dashboard');
         }
       }
     } catch (err: any) {

@@ -1,9 +1,14 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../utils/response.js';
-import { createBlog, getBlogById, listBlogs, updateBlog } from './blogs.controller.js';
+import { createBlog, getBlogById, listBlogs, updateBlog, deleteBlog, listMyBlogs, getComments, addComment, deleteComment } from './blogs.controller.js';
 import { requireAuth } from '../../middlewares/auth.js';
 export const blogsRouter = Router();
 blogsRouter.get('/', asyncHandler(listBlogs));
+blogsRouter.get('/me', requireAuth, asyncHandler(listMyBlogs));
 blogsRouter.get('/:id', asyncHandler(getBlogById));
 blogsRouter.post('/', requireAuth, asyncHandler(createBlog));
 blogsRouter.patch('/:id', requireAuth, asyncHandler(updateBlog));
+blogsRouter.delete('/:id', requireAuth, asyncHandler(deleteBlog));
+blogsRouter.get('/:id/comments', asyncHandler(getComments));
+blogsRouter.post('/:id/comments', requireAuth, asyncHandler(addComment));
+blogsRouter.delete('/:id/comments/:commentId', requireAuth, asyncHandler(deleteComment));

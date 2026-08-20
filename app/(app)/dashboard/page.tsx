@@ -39,8 +39,8 @@ export default function DashboardPage() {
         setProfile(p);
         try { 
           const certs = await adminApi.certificates.listForUser(p.id); 
-          setCertificates(certs); 
-        } catch { /* ignore */ }
+          if (Array.isArray(certs)) setCertificates(certs); 
+        } catch { /* non-admin users get 403 — expected */ }
       }
       if (langs) setLanguages(langs);
       setLoading(false);

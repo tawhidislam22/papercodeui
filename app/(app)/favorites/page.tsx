@@ -23,7 +23,11 @@ export default function FavoritesPage() {
     }
     setUserId(demoUser.id);
     api.bookmarks.getAll()
-      .then(setBookmarks)
+      .then((data) => setBookmarks(Array.isArray(data) ? data : []))
+      .catch((e) => {
+        console.error(e);
+        setBookmarks([]);
+      })
       .finally(() => setLoading(false));
   }, [router]);
 

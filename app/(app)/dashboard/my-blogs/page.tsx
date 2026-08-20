@@ -20,7 +20,7 @@ export default function MyBlogsPage() {
       router.push('/auth');
       return;
     }
-    api.blogs.getMyBlogs().then(setMyBlogs).finally(() => setLoading(false));
+    api.blogs.getMyBlogs().then(data => setMyBlogs(data || [])).finally(() => setLoading(false));
   }, [router]);
 
   if (loading) {

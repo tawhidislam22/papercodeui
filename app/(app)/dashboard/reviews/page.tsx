@@ -16,9 +16,10 @@ export default function MyReviewsPage() {
   async function loadReviews() {
     try {
       const data = await api.reviews.getMyReviews();
-      setReviews(data);
+      setReviews(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
+      setReviews([]);
     } finally {
       setLoading(false);
     }

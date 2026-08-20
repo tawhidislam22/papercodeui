@@ -4,7 +4,11 @@ import type { Metadata } from 'next';
 import NextTopLoader from 'nextjs-toploader';
 import { Providers } from './providers';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Paper Code — Learn Coding by Writing',
   description: 'Write code on paper, upload it, and let AI teach you. The most hands-on coding learning platform.',
   openGraph: {

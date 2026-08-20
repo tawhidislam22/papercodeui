@@ -40,6 +40,27 @@ async function adminFetch<T>(path: string, options: RequestInit = {}): Promise<T
   return res.json() as Promise<T>;
 }
 
+// Fetch against /api/* (no /admin prefix) — for routes like reviews
+async function baseFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (!apiBase) {
+    throw new Error('NEXT_PUBLIC_BACKEND_URL is not set.');
+  }
+  const headers = new Headers(options.headers || {});
+  const dh = getDemoHeaders();
+  Object.entries(dh).forEach(([k, v]) => headers.set(k, v));
+  if (options.body && !headers.has('content-type')) {
+    headers.set('content-type', 'application/json');
+  }
+
+  const res = await fetch(`${apiBase}${path}`, { ...options, headers });
+  if (res.status === 204) return null as T;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Request failed (${res.status})`);
+  }
+  return res.json() as Promise<T>;
+}
+
 // ─── Types ──────────────────────────────────────────────────────────────
 
 export type AdminStats = {
@@ -244,14 +265,14 @@ export const adminApi = {
     list: () => adminFetch<LeaderboardUser[]>('/leaderboard'),
   },
   
-  // Reviews
+  // Reviews (routes are at /api/reviews/*, not /api/admin/reviews/*)
   reviews: {
-    list: () => adminFetch<any[]>('/reviews/admin'),
-    reply: (id: string, reply: string) => adminFetch<any>(`/reviews/${id}/reply`, {
+    list: () => baseFetch<any[]>('/reviews/admin'),
+    reply: (id: string, reply: string) => baseFetch<any>(`/reviews/${id}/reply`, {
       method: 'PATCH',
       body: JSON.stringify({ reply }),
     }),
-    delete: (id: string) => adminFetch(`/reviews/${id}`, {
+    delete: (id: string) => baseFetch(`/reviews/${id}`, {
       method: 'DELETE',
     }),
   },

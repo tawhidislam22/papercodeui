@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../utils/response.js';
 import { getLessonBySlug, listLessons } from './lessons.controller.js';
+import { getLessonReviews, addReview } from '../reviews/reviews.controller.js';
+import { requireAuth } from '../../middlewares/auth.js';
 export const lessonsRouter = Router();
 lessonsRouter.get('/', asyncHandler(listLessons));
 lessonsRouter.get('/slug/:slug', asyncHandler(getLessonBySlug));
+lessonsRouter.get('/:lessonId/reviews', asyncHandler(getLessonReviews));
+lessonsRouter.post('/:lessonId/reviews', requireAuth, asyncHandler(addReview));

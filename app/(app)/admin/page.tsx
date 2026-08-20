@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Users, BookOpen, BookMarked, FileText, Layers, Trophy, TrendingUp, Award, ArrowRight } from 'lucide-react';
+import { Users, BookOpen, BookMarked, FileText, Layers, Trophy, TrendingUp, Award, ArrowRight, Star, MessageSquare, Shield } from 'lucide-react';
 import { adminApi, type AdminStats, type AdminUser, type AdminBlog } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,17 +15,21 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     Promise.all([adminApi.stats(), adminApi.users.list(), adminApi.blogs.list()])
-      .then(([s, u, b]) => { setStats(s); setUsers(u); setBlogs(b); })
+      .then(([s, u, b]) => {
+        setStats(s);
+        setUsers(Array.isArray(u) ? u : []);
+        setBlogs(Array.isArray(b) ? b : []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   const cards = [
-    { label: 'Total Users', value: stats?.users ?? 0, icon: Users, color: 'bg-blue-500', iconBg: 'bg-blue-50 text-blue-600', trend: '+12%', href: '/admin/users' },
-    { label: 'Lessons', value: stats?.lessons ?? 0, icon: BookOpen, color: 'bg-emerald-500', iconBg: 'bg-emerald-50 text-emerald-600', trend: '+3', href: '/admin/lessons' },
-    { label: 'Chapters', value: stats?.chapters ?? 0, icon: Layers, color: 'bg-purple-500', iconBg: 'bg-purple-50 text-purple-600', trend: '+8', href: '/admin/lessons' },
-    { label: 'Blog Posts', value: stats?.blogs ?? 0, icon: BookMarked, color: 'bg-amber-500', iconBg: 'bg-amber-50 text-amber-600', trend: '+5', href: '/admin/blogs' },
-    { label: 'Submissions', value: stats?.submissions ?? 0, icon: FileText, color: 'bg-rose-500', iconBg: 'bg-rose-50 text-rose-600', trend: '+24', href: '/admin/leaderboard' },
+    { label: 'Total Users', value: stats?.users ?? 0, icon: Users, iconBg: 'bg-blue-50 text-blue-600', trend: '+12%', href: '/admin/users' },
+    { label: 'Lessons', value: stats?.lessons ?? 0, icon: BookOpen, iconBg: 'bg-emerald-50 text-emerald-600', trend: '+3', href: '/admin/lessons' },
+    { label: 'Chapters', value: stats?.chapters ?? 0, icon: Layers, iconBg: 'bg-purple-50 text-purple-600', trend: '+8', href: '/admin/lessons' },
+    { label: 'Blog Posts', value: stats?.blogs ?? 0, icon: BookMarked, iconBg: 'bg-amber-50 text-amber-600', trend: '+5', href: '/admin/blogs' },
+    { label: 'Submissions', value: stats?.submissions ?? 0, icon: FileText, iconBg: 'bg-rose-50 text-rose-600', trend: '+24', href: '/admin/leaderboard' },
   ];
 
   const topUsers = [...users].sort((a, b) => b.xp - a.xp).slice(0, 5);
@@ -34,18 +38,54 @@ export default function AdminDashboardPage() {
   const publishedBlogs = blogs.filter(b => b.isPublished).length;
   const draftBlogs = blogs.filter(b => !b.isPublished).length;
 
+  const quickActions = [
+    {
+      title: 'Manage Blogs',
+      desc: 'Create, edit & publish articles',
+      href: '/admin/blogs',
+      icon: BookMarked,
+      gradient: 'from-blue-500 to-cyan-500',
+    },
+    {
+      title: 'Manage Lessons',
+      desc: 'Add chapters, problems & content',
+      href: '/admin/lessons',
+      icon: BookOpen,
+      gradient: 'from-purple-500 to-pink-500',
+    },
+    {
+      title: 'Manage Users',
+      desc: 'View users, issue certificates',
+      href: '/admin/users',
+      icon: Users,
+      gradient: 'from-amber-500 to-orange-500',
+    },
+    {
+      title: 'Manage Reviews',
+      desc: 'Reply to student lesson reviews',
+      href: '/admin/reviews',
+      icon: Star,
+      gradient: 'from-indigo-500 to-violet-500',
+    },
+  ];
+
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 mt-1">Welcome back! Here&apos;s your platform overview.</p>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-sm">
+          <Shield className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-500 text-sm">Welcome back! Here&apos;s your platform overview.</p>
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map((card) => (
-          <Link key={card.label} href={card.href} className="block">
+          <Link key={card.label} href={card.href} className="block group">
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 transition-all h-full cursor-pointer">
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center`}>
@@ -59,37 +99,31 @@ export default function AdminDashboardPage() {
                 <p className="text-2xl font-bold text-gray-900">{card.value}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">{card.label}</p>
+              <div className="flex items-center gap-1 mt-2 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+                View details <ArrowRight className="w-3 h-3" />
+              </div>
             </div>
           </Link>
         ))}
       </div>
 
       {/* Quick Actions */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <Link href="/admin/blogs" className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-5 text-white hover:shadow-lg transition-shadow group">
-          <BookMarked className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-bold text-lg">Create Blog Post</h3>
-          <p className="text-blue-100 text-sm mt-1">Write and publish a new article</p>
-          <div className="flex items-center gap-1 mt-3 text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity">
-            Go to Blogs <ArrowRight className="w-4 h-4" />
-          </div>
-        </Link>
-        <Link href="/admin/lessons" className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-5 text-white hover:shadow-lg transition-shadow group">
-          <BookOpen className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-bold text-lg">Manage Lessons</h3>
-          <p className="text-purple-100 text-sm mt-1">Add chapters, problems & content</p>
-          <div className="flex items-center gap-1 mt-3 text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity">
-            Go to Lessons <ArrowRight className="w-4 h-4" />
-          </div>
-        </Link>
-        <Link href="/admin/users" className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white hover:shadow-lg transition-shadow group">
-          <Award className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-bold text-lg">Issue Certificates</h3>
-          <p className="text-amber-100 text-sm mt-1">Award certificates to top learners</p>
-          <div className="flex items-center gap-1 mt-3 text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity">
-            Go to Users <ArrowRight className="w-4 h-4" />
-          </div>
-        </Link>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {quickActions.map((card) => (
+          <Link key={card.title} href={card.href} className="block group">
+            <div className={`bg-gradient-to-br ${card.gradient} rounded-2xl p-5 text-white hover:shadow-lg transition-all hover:-translate-y-0.5 relative overflow-hidden h-full`}>
+              <div className="absolute right-4 top-4 opacity-20 group-hover:opacity-30 transition-opacity">
+                <card.icon className="w-16 h-16" />
+              </div>
+              <card.icon className="w-6 h-6 mb-3 relative z-10" />
+              <h3 className="font-bold text-lg relative z-10">{card.title}</h3>
+              <p className="text-white/80 text-sm mt-1 relative z-10">{card.desc}</p>
+              <div className="flex items-center gap-1 mt-3 text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity relative z-10">
+                Open <ArrowRight className="w-4 h-4" />
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -100,11 +134,13 @@ export default function AdminDashboardPage() {
               <Trophy className="w-4 h-4 text-amber-500" />
               <h3 className="font-bold text-gray-900">Top Performers</h3>
             </div>
-            <Link href="/admin/users"><Button variant="ghost" size="sm" className="text-xs gap-1">View all <ArrowRight className="w-3 h-3" /></Button></Link>
+            <Link href="/admin/leaderboard"><Button variant="ghost" size="sm" className="text-xs gap-1">View all <ArrowRight className="w-3 h-3" /></Button></Link>
           </div>
           <div className="divide-y divide-gray-50">
             {loading ? [...Array(5)].map((_, i) => <div key={i} className="px-5 py-3"><div className="h-5 bg-gray-100 rounded animate-pulse" /></div>) :
-              topUsers.map((user, i) => (
+              topUsers.length === 0 ? (
+                <div className="px-5 py-8 text-center text-gray-400 text-sm">No users yet</div>
+              ) : topUsers.map((user, i) => (
                 <Link key={user.id} href="/admin/users" className="block">
                   <div className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-100 text-gray-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}>
@@ -167,10 +203,13 @@ export default function AdminDashboardPage() {
               <TrendingUp className="w-4 h-4 text-emerald-500" />
               <h3 className="font-bold text-gray-900">Recent Users</h3>
             </div>
+            <Link href="/admin/users"><Button variant="ghost" size="sm" className="text-xs gap-1">View all <ArrowRight className="w-3 h-3" /></Button></Link>
           </div>
           <div className="divide-y divide-gray-50">
             {loading ? [...Array(5)].map((_, i) => <div key={i} className="px-5 py-3"><div className="h-5 bg-gray-100 rounded animate-pulse" /></div>) :
-              recentUsers.map((user) => (
+              recentUsers.length === 0 ? (
+                <div className="px-5 py-8 text-center text-gray-400 text-sm">No users yet</div>
+              ) : recentUsers.map((user) => (
                 <Link key={user.id} href="/admin/users" className="block">
                   <div className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
                     <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Lock, Sparkles } from 'lucide-react';
@@ -9,10 +10,24 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { TheoryBlock } from '@/components/lessons/blocks/TheoryBlock';
-import { MCQBlock } from '@/components/lessons/blocks/MCQBlock';
-import { CodingBlock } from '@/components/lessons/blocks/CodingBlock';
 import { useLessonStore } from '@/lib/stores/lesson-store';
+
+const BlockLoading = () => (
+  <div className="h-72 animate-pulse rounded-2xl border border-gray-100 bg-gray-50" />
+);
+
+const TheoryBlock = dynamic(
+  () => import('@/components/lessons/blocks/TheoryBlock').then((module) => module.TheoryBlock),
+  { loading: BlockLoading },
+);
+const MCQBlock = dynamic(
+  () => import('@/components/lessons/blocks/MCQBlock').then((module) => module.MCQBlock),
+  { loading: BlockLoading },
+);
+const CodingBlock = dynamic(
+  () => import('@/components/lessons/blocks/CodingBlock').then((module) => module.CodingBlock),
+  { ssr: false, loading: BlockLoading },
+);
 
 export default function ChapterLearningPage() {
   const { id } = useParams<{ id: string }>();

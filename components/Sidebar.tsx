@@ -29,9 +29,13 @@ export default function Sidebar() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Read role from localStorage immediately so sidebar doesn't flash user items for admins
+  const demoUser = typeof window !== 'undefined' ? getDemoUser() : null;
+  const localRole = demoUser?.role;
+
   useEffect(() => {
-    const demoUser = getDemoUser();
-    if (!demoUser) return;
+    const du = getDemoUser();
+    if (!du) return;
     api.users.getMe().then(setProfile).catch(() => setProfile(null));
   }, []);
 
@@ -46,7 +50,8 @@ export default function Sidebar() {
   }
 
   const level = profile ? getLevelFromXP(profile.xp) : 1;
-  const isAdmin = profile?.role === 'ADMIN';
+  // Admin if profile says so, OR localStorage says so, OR user is on /admin/* pages
+  const isAdmin = profile?.role === 'ADMIN' || localRole === 'ADMIN' || pathname.startsWith('/admin');
 
   const NAV_ITEMS = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', adminOnly: true, exact: true },
