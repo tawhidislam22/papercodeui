@@ -14,6 +14,10 @@ export default function BlogPostPage() {
   const [blog, setBlog] = useState<(Partial<Blog> & { author?: string; authorInitial?: string; content?: string; authorProfile?: Profile | null }) | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [postingComment, setPostingComment] = useState(false);
 
   useEffect(() => {
     // Try to load from DB first, fall back to placeholder
@@ -24,6 +28,10 @@ export default function BlogPostPage() {
       })
       .catch(() => null)
       .finally(() => setLoading(false));
+
+    api.blogs.getComments(id)
+      .then((data) => setComments(data))
+      .catch(() => null);
 
     api.bookmarks.getAll()
       .then((bookmarks) => {
@@ -145,13 +153,103 @@ export default function BlogPostPage() {
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <MessageCircle className="w-4 h-4" />
-            {blog.commentsCount ?? 0}
+            {comments.length}
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 ml-auto">
+          <Button variant="outline" size="sm" className="gap-2 ml-auto" onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success('Link copied to clipboard');
+          }}>
             <Share2 className="w-4 h-4" /> Share
           </Button>
         </div>
       </article>
+
+      {/* Comments Section */}
+      <div className="mt-12 pt-8 border-t border-gray-100">
+        <h3 className="text-xl font-bold text-gray-900 mb-6">Comments ({comments.length})</h3>
+        
+        {getDemoUser() ? (
+          <div className="mb-8">
+            <textarea
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm resize-y focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all"
+              rows={3}
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <div className="flex justify-end mt-2">
+              <Button 
+                onClick={async () => {
+                  if (!newComment.trim()) return;
+                  setPostingComment(true);
+                  try {
+                    const c = await api.blogs.addComment(id, newComment.trim());
+                    setComments([c, ...comments]);
+                    setNewComment('');
+                    toast.success('Comment added');
+                  } catch (e) {
+                    toast.error('Failed to post comment');
+                  } finally {
+                    setPostingComment(false);
+                  }
+                }}
+                disabled={postingComment || !newComment.trim()}
+                className="text-white"
+                style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}
+              >
+                {postingComment ? 'Posting...' : 'Post Comment'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-xl p-4 text-center text-sm text-gray-500 mb-8 border border-gray-100">
+            Please <Link href="/auth" className="text-blue-600 font-semibold hover:underline">log in</Link> to join the discussion.
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {comments.map((comment: any) => (
+            <div key={comment.id} className="flex gap-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-600 font-bold shrink-0 text-sm">
+                {(comment.user?.displayName || comment.user?.username || '?').charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-semibold text-gray-900 text-sm">
+                    {comment.user?.displayName || comment.user?.username || 'Anonymous'}
+                  </div>
+                  <div className="text-xs text-gray-400 flex items-center gap-2">
+                    {new Date(comment.createdAt).toLocaleDateString()}
+                    {getDemoUser()?.id === comment.userId && (
+                      <button 
+                        className="text-red-500 hover:text-red-700 font-medium ml-2"
+                        onClick={async () => {
+                          if (!confirm('Delete comment?')) return;
+                          try {
+                            await api.blogs.deleteComment(id, comment.id);
+                            setComments(comments.filter((c: any) => c.id !== comment.id));
+                            toast.success('Comment deleted');
+                          } catch {
+                            toast.error('Failed to delete comment');
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm whitespace-pre-wrap">{comment.content}</p>
+              </div>
+            </div>
+          ))}
+          {comments.length === 0 && (
+            <div className="text-center py-8 text-gray-400 text-sm">
+              No comments yet. Be the first to share your thoughts!
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

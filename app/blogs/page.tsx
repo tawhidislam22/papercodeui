@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Plus, BookMarked, Heart, Clock, Eye } from 'lucide-react';
+import { Search, Plus, BookMarked, Heart, Clock, Eye, MessageCircle } from 'lucide-react';
 import { api, getDemoUser, type Blog, type Profile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -136,6 +136,7 @@ export default function BlogsPage() {
                   <div className="flex items-center gap-2 text-xs text-gray-400 shrink-0">
                     <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.views}</span>
                     <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{post.likesCount}</span>
+                    <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" />{post.commentsCount ?? 0}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.readingTime}m</span>
                   </div>
                 </div>

@@ -434,6 +434,20 @@ export const api = {
 		},
 		getMyBlogs() {
 			return apiFetch<Blog[]>('/blogs/me');
+		},
+		getComments(id: string) {
+			return apiFetch<any[]>(`/blogs/${id}/comments`);
+		},
+		addComment(id: string, content: string) {
+			return apiFetch<any>(`/blogs/${id}/comments`, {
+				method: 'POST',
+				body: JSON.stringify({ content }),
+			});
+		},
+		deleteComment(id: string, commentId: string) {
+			return apiFetch(`/blogs/${id}/comments/${commentId}`, {
+				method: 'DELETE',
+			});
 		}
 	},
 	bookmarks: {

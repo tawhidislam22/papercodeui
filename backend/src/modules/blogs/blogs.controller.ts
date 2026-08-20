@@ -37,3 +37,22 @@ export async function listMyBlogs(req: Request, res: Response) {
   const blogs = await blogsService.listMyBlogs(res.locals.user.id);
   return res.json(blogs);
 }
+
+export async function getComments(req: Request, res: Response) {
+  const comments = await blogsService.getComments(req.params.id);
+  return res.json(comments);
+}
+
+export async function addComment(req: Request, res: Response) {
+  if (!res.locals.user) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.body.content || typeof req.body.content !== 'string') return res.status(400).json({ error: 'Content is required' });
+  const comment = await blogsService.addComment(req.params.id, res.locals.user.id, req.body.content);
+  return res.status(201).json(comment);
+}
+
+export async function deleteComment(req: Request, res: Response) {
+  if (!res.locals.user) return res.status(401).json({ error: 'Unauthorized' });
+  const result = await blogsService.deleteComment(req.params.id, req.params.commentId, res.locals.user.id);
+  if (!result) return res.status(404).json({ error: 'Not found or not authorized' });
+  return res.json({ deleted: true });
+}

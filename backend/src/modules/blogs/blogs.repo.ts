@@ -54,5 +54,37 @@ export const blogsRepo = {
       where: { authorId: userId },
       orderBy: { createdAt: 'desc' },
     });
+  },
+  getComments(blogId: string) {
+    return prisma.comment.findMany({
+      where: { blogId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { id: true, username: true, displayName: true } }
+      }
+    });
+  },
+  async addComment(blogId: string, userId: string, content: string) {
+    const comment = await prisma.comment.create({
+      data: { blogId, userId, content },
+      include: {
+        user: { select: { id: true, username: true, displayName: true } }
+      }
+    });
+    await prisma.blog.update({
+      where: { id: blogId },
+      data: { commentsCount: { increment: 1 } }
+    });
+    return comment;
+  },
+  async deleteComment(blogId: string, commentId: string, userId: string) {
+    const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+    if (!comment || comment.blogId !== blogId || comment.userId !== userId) return null;
+    await prisma.comment.delete({ where: { id: commentId } });
+    await prisma.blog.update({
+      where: { id: blogId },
+      data: { commentsCount: { decrement: 1 } }
+    });
+    return true;
   }
 };

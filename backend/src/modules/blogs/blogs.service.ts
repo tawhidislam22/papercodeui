@@ -18,5 +18,14 @@ export const blogsService = {
   },
   listMyBlogs(userId: string) {
     return blogsRepo.listMyBlogs(userId);
+  },
+  getComments(blogId: string) {
+    return blogsRepo.getComments(blogId);
+  },
+  addComment(blogId: string, userId: string, content: string) {
+    return blogsRepo.addComment(blogId, userId, content);
+  },
+  deleteComment(blogId: string, commentId: string, userId: string) {
+    return blogsRepo.deleteComment(blogId, commentId, userId);
   }
 };
