@@ -26,16 +26,19 @@ export function CodingBlock({
   challenge,
   chapterId: _chapterId,
   onCorrect,
+  onNext,
 }: {
   title: string;
   challenge: CodingChallenge;
   chapterId: string;
   onCorrect: () => void;
+  onNext?: () => void;
 }) {
   const [language, setLanguage] = useState<string>(challenge.language || 'python');
   const [code, setCode] = useState<string>(challenge.starterCode || '');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [stdin, setStdin] = useState<string>('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const extractor = useCodeExtractor();
   const executor = useCodeExecutor();
@@ -55,6 +58,7 @@ export function CodingBlock({
   // ─── Run code ─────────────────────────────────────────────────────────
 
   async function handleRun() {
+    setIsSuccess(false);
     if (!code.trim()) return;
     const languageId = JUDGE0_IDS[language] ?? 71;
     const output = await executor.runCode(code, languageId, stdin);
@@ -64,6 +68,7 @@ export function CodingBlock({
       output !== null &&
       (!challenge.expectedOutput || output.trim() === challenge.expectedOutput.trim())
     ) {
+      setIsSuccess(true);
       onCorrect();
     }
   }
@@ -196,12 +201,12 @@ export function CodingBlock({
           {executor.output && (
             <div
               className={`rounded-2xl border p-4 text-sm ${
-                !challenge.expectedOutput || executor.output.trim() === challenge.expectedOutput.trim()
+                isSuccess
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                   : 'border-rose-200 bg-rose-50 text-rose-700'
               }`}
             >
-              {!challenge.expectedOutput || executor.output.trim() === challenge.expectedOutput.trim() ? (
+              {isSuccess ? (
                 <p className="font-semibold">✅ Execution successful!</p>
               ) : (
                 <>
@@ -229,6 +234,11 @@ export function CodingBlock({
         <Button disabled={!canRun} onClick={handleRun} variant="outline" className="rounded-xl gap-2">
           <Send className="h-4 w-4" /> Submit
         </Button>
+        {isSuccess && onNext && (
+          <Button onClick={onNext} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm ml-auto">
+            Next Step →
+          </Button>
+        )}
       </div>
     </motion.div>
   );
