@@ -42,7 +42,7 @@ app.use(async (req, res, next) => {
 		try {
 			user = await prisma.user.upsert({
 				where: { id: demoUserId },
-				update: { displayName },
+				update: {}, // Don't overwrite displayName every time unless necessary, or just leave empty
 				create: {
 					id: demoUserId,
 					email,
@@ -52,6 +52,52 @@ app.use(async (req, res, next) => {
 					bio: '',
 				},
 			});
+
+			// Handle Streak Logic
+			const now = new Date();
+			const todayStr = now.toISOString().split('T')[0];
+			const lastActiveStr = user.lastActiveDate ? user.lastActiveDate.toISOString().split('T')[0] : null;
+
+			if (lastActiveStr !== todayStr) {
+				let newStreak = user.streak;
+				
+				if (lastActiveStr) {
+					const yesterday = new Date();
+					yesterday.setDate(yesterday.getDate() - 1);
+					const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+					if (lastActiveStr === yesterdayStr) {
+						newStreak += 1;
+					} else {
+						newStreak = 1;
+					}
+				} else {
+					newStreak = 1; // First time active
+				}
+
+				const newLongest = Math.max(user.longestStreak, newStreak);
+
+				user = await prisma.user.update({
+					where: { id: user.id },
+					data: {
+						streak: newStreak,
+						longestStreak: newLongest,
+						lastActiveDate: now,
+						xp: { increment: 5 } // Daily login XP
+					},
+				});
+				
+				// Optional: Record the XP event
+				await prisma.xpEvent.create({
+					data: {
+						userId: user.id,
+						eventType: 'daily_login',
+						xpAmount: 5,
+						description: 'Daily login bonus',
+					}
+				});
+			}
+
 		} catch (error: any) {
 			if (error.code === 'P2002') {
 				user = await prisma.user.findFirst({
