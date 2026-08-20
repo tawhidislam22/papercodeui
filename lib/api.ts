@@ -42,6 +42,8 @@ export type LessonSummary = {
 	completedChapters: number;
 	progressPercent: number;
 	totalEstimatedMinutes: number;
+	averageRating?: number;
+	reviewsCount?: number;
 };
 
 export type LessonChapter = {
@@ -393,6 +395,20 @@ export const api = {
 				body: JSON.stringify(data),
 			});
 		},
+	},
+	reviews: {
+		getForLesson(lessonId: string) {
+			return apiFetch<any[]>(`/lessons/${lessonId}/reviews`);
+		},
+		addReview(lessonId: string, rating: number, content: string) {
+			return apiFetch<any>(`/lessons/${lessonId}/reviews`, {
+				method: 'POST',
+				body: JSON.stringify({ rating, content })
+			});
+		},
+		getMyReviews() {
+			return apiFetch<any[]>('/reviews/me');
+		}
 	},
 	executions: {
 		run(data: { chapterId?: string; language: string; sourceCode: string; stdin?: string }) {

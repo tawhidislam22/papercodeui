@@ -77,6 +77,7 @@ model User {
   bookmarks       Bookmark[]
   following       Follow[] @relation("Following")
   followers       Follow[] @relation("Followers")
+  reviews         Review[]
 }
 
 model Language {
@@ -114,6 +115,26 @@ model Lesson {
   progress    UserProgress[]
   challenges  Challenge[]
   bookmarks   Bookmark[]
+  reviews     Review[]
+
+  averageRating Float    @default(0)
+  reviewsCount  Int      @default(0)
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  lessonId  String
+  userId    String
+  rating    Int
+  content   String
+  reply     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, userId])
 }
 
 model Chapter {

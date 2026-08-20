@@ -18,6 +18,7 @@ import {
   X,
   Heart,
   PenTool,
+  Star,
 } from 'lucide-react';
 import { api, clearDemoUser, getDemoUser, type Profile, getLevelFromXP } from '@/lib/api';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -54,6 +55,7 @@ export default function Sidebar() {
     { href: '/admin/users', icon: Users, label: 'Users', adminOnly: true },
     { href: '/admin/blogs', icon: BookMarked, label: 'Blogs', adminOnly: true },
     { href: '/admin/lessons', icon: BookOpen, label: 'Lessons', adminOnly: true },
+    { href: '/admin/reviews', icon: Star, label: 'Reviews', adminOnly: true },
   ];
 
   const userItems = [
@@ -61,6 +63,7 @@ export default function Sidebar() {
     { href: '/dashboard/upload', icon: Upload, label: 'Upload Code', adminOnly: false },
     { href: '/lessons', icon: BookOpen, label: 'Lessons', adminOnly: false },
     { href: '/dashboard/my-blogs', icon: PenTool, label: 'My Blogs', adminOnly: false },
+    { href: '/dashboard/reviews', icon: Star, label: 'My Reviews', adminOnly: false },
     { href: '/favorites', icon: Heart, label: 'Favorites', adminOnly: false },
     { href: '/leaderboard', icon: Trophy, label: 'Leaderboard', adminOnly: false },
     { href: '/profile', icon: User, label: 'Profile', adminOnly: false },

@@ -13,6 +13,7 @@ import { commentsRouter } from './comments/comments.routes.js';
 import { xpRouter } from './xp/xp.routes.js';
 import { adminRouter } from './admin/admin.routes.js';
 import { bookmarksRouter } from './bookmarks/bookmarks.routes.js';
+import { reviewsRouter } from './reviews/reviews.routes.js';
 
 export const apiRouter = Router();
 
@@ -30,3 +31,4 @@ apiRouter.use('/comments', commentsRouter);
 apiRouter.use('/xp', xpRouter);
 apiRouter.use('/admin', adminRouter);
 apiRouter.use('/bookmarks', bookmarksRouter);
+apiRouter.use('/reviews', reviewsRouter);

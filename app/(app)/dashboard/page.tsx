@@ -161,7 +161,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick action cards */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
             title: 'Upload Handwritten Code',
@@ -186,6 +186,14 @@ export default function DashboardPage() {
             icon: Trophy,
             cta: 'View rankings',
             gradient: 'from-orange-500 to-amber-400',
+          },
+          {
+            title: 'My Reviews',
+            desc: 'Manage ratings and reviews you have written for lessons.',
+            href: '/dashboard/reviews',
+            icon: Star,
+            cta: 'View reviews',
+            gradient: 'from-indigo-500 to-purple-400',
           },
         ].map((card) => (
           <div key={card.title} className={`bg-gradient-to-br ${card.gradient} rounded-2xl p-6 text-white relative overflow-hidden group`}>

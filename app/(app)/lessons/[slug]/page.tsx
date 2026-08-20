@@ -7,9 +7,10 @@ import { ArrowLeft, BookOpen, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { api, getDemoUser } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { LessonSidebar } from '@/components/lessons/LessonSidebar';
 import { ChapterRow } from '@/components/lessons/ChapterRow';
+import { LessonReviews } from '@/components/lessons/LessonReviews';
+import { toast } from 'sonner';
 
 export default function LessonDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -134,6 +135,11 @@ export default function LessonDetailPage() {
           xpReward={lesson.xpReward}
         />
       </div>
+      
+      <LessonReviews 
+        lessonId={lesson.id} 
+        isCompleted={progressSummary.total > 0 && progressSummary.total === progressSummary.completed} 
+      />
     </div>
   );
 }

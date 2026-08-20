@@ -243,5 +243,17 @@ export const adminApi = {
   leaderboard: {
     list: () => adminFetch<LeaderboardUser[]>('/leaderboard'),
   },
+  
+  // Reviews
+  reviews: {
+    list: () => adminFetch<any[]>('/reviews/admin'),
+    reply: (id: string, reply: string) => adminFetch<any>(`/reviews/${id}/reply`, {
+      method: 'PATCH',
+      body: JSON.stringify({ reply }),
+    }),
+    delete: (id: string) => adminFetch(`/reviews/${id}`, {
+      method: 'DELETE',
+    }),
+  },
 };
 
