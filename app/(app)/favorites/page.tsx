@@ -17,7 +17,7 @@ export default function FavoritesPage() {
   useEffect(() => {
     const demoUser = getDemoUser();
     if (!demoUser) {
-      router.push('/login');
+      router.push('/auth');
       return;
     }
     setUserId(demoUser.id);

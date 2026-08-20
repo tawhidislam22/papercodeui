@@ -30,7 +30,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const demoUser = getDemoUser();
     if (!demoUser) {
-      router.push('/login');
+      router.push('/auth');
       return;
     }
     
@@ -65,7 +65,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
     setError('');
 
     const demoUser = getDemoUser();
-    if (!demoUser) { router.push('/login'); return; }
+    if (!demoUser) { router.push('/auth'); return; }
 
     const readingTime = Math.max(1, Math.ceil(content.split(' ').length / 200));
 

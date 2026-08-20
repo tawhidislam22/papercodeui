@@ -47,7 +47,7 @@ export default function NewBlogPage() {
     setError('');
 
     const demoUser = getDemoUser();
-    if (!demoUser) { router.push('/login'); return; }
+    if (!demoUser) { router.push('/auth'); return; }
 
     const slug = slugify(title) + '-' + Date.now();
     const readingTime = Math.max(1, Math.ceil(content.split(' ').length / 200));

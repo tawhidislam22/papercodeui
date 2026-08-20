@@ -17,7 +17,7 @@ export default function MyBlogsPage() {
   useEffect(() => {
     const demoUser = getDemoUser();
     if (!demoUser) {
-      router.push('/login');
+      router.push('/auth');
       return;
     }
     api.blogs.getMyBlogs().then(setMyBlogs).finally(() => setLoading(false));

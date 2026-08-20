@@ -61,7 +61,7 @@ export default function BlogsPage() {
         </div>
         <Button 
           onClick={() => {
-            if (!userId) router.push('/login');
+            if (!userId) router.push('/auth');
             else router.push('/blogs/new');
           }}
           className="text-white gap-2" 
@@ -152,7 +152,7 @@ export default function BlogsPage() {
           <p className="text-gray-400 text-sm mt-1">Be the first to write about this topic!</p>
           <Button 
             onClick={() => {
-              if (!userId) router.push('/login');
+            if (!userId) router.push('/auth');
               else router.push('/blogs/new');
             }}
             className="mt-4 text-white" 
