@@ -43,17 +43,21 @@ export default function ChapterLearningPage() {
 
   const blocks = useMemo(() => chapter?.blocks ?? [], [chapter]);
 
+  const [hasInitialized, setHasInitialized] = useState(false);
+
   useEffect(() => {
-    if (!chapter || blocks.length === 0) return;
+    if (!chapter || blocks.length === 0 || hasInitialized) return;
     resetProgress();
     const fromProgress = chapter.progress?.currentBlockId;
     const completed = chapter.progress?.completedBlockIds ?? [];
     setCompletedBlockIds(completed);
     const indexFromProgress = fromProgress ? blocks.findIndex((block) => block.id === fromProgress) : -1;
-    const defaultIndex = indexFromProgress >= 0 ? indexFromProgress : completed.length;
+    let defaultIndex = indexFromProgress >= 0 ? indexFromProgress : completed.length;
+    if (defaultIndex >= blocks.length) defaultIndex = blocks.length - 1;
     setActiveIndex(defaultIndex);
     setCurrentBlockId(blocks[defaultIndex]?.id);
-  }, [chapter, blocks, resetProgress, setCurrentBlockId, setCompletedBlockIds]);
+    setHasInitialized(true);
+  }, [chapter, blocks, resetProgress, setCurrentBlockId, setCompletedBlockIds, hasInitialized]);
 
   async function handleCompleteBlock(blockId: string) {
     if (!chapter) return;
@@ -124,13 +128,6 @@ export default function ChapterLearningPage() {
                   title={activeBlock.title}
                   question={activeBlock.mcq}
                   onCorrect={() => handleCompleteBlock(activeBlock.id)}
-                  onNext={() => {
-                    if (activeIndex < blocks.length - 1) {
-                      const nextIndex = activeIndex + 1;
-                      setActiveIndex(nextIndex);
-                      setCurrentBlockId(blocks[nextIndex]?.id);
-                    }
-                  }}
                 />
               )}
               {activeBlock.type === 'CODING' && activeBlock.coding && (
@@ -139,13 +136,6 @@ export default function ChapterLearningPage() {
                   challenge={activeBlock.coding}
                   chapterId={chapter.id}
                   onCorrect={() => handleCompleteBlock(activeBlock.id)}
-                  onNext={() => {
-                    if (activeIndex < blocks.length - 1) {
-                      const nextIndex = activeIndex + 1;
-                      setActiveIndex(nextIndex);
-                      setCurrentBlockId(blocks[nextIndex]?.id);
-                    }
-                  }}
                 />
               )}
 

@@ -73,23 +73,22 @@ export function MCQBlock({
         <Button
           disabled={selected === null}
           onClick={() => {
-            if (validated && isCorrect) {
-              onNext?.();
-              return;
-            }
             if (validated && !isCorrect) {
               setValidated(false);
               setSelected(null);
               return;
+            }
+            if (validated && isCorrect) {
+              return; // Do nothing, wait for user to click the external Next Step button
             }
             setValidated(true);
             if (selected !== null && selected === question.correctIndex) {
               onCorrect();
             }
           }}
-          className={`rounded-xl ${validated && isCorrect ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
+          className={`rounded-xl ${validated && isCorrect ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-default' : ''}`}
         >
-          {validated ? (isCorrect ? 'Next Step →' : 'Check again') : 'Check answer'}
+          {validated ? (isCorrect ? 'Correct!' : 'Check again') : 'Check answer'}
         </Button>
       </div>
     </motion.div>

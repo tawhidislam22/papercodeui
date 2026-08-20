@@ -234,11 +234,6 @@ export function CodingBlock({
         <Button disabled={!canRun} onClick={handleRun} variant="outline" className="rounded-xl gap-2">
           <Send className="h-4 w-4" /> Submit
         </Button>
-        {isSuccess && onNext && (
-          <Button onClick={onNext} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm ml-auto">
-            Next Step →
-          </Button>
-        )}
       </div>
     </motion.div>
   );
