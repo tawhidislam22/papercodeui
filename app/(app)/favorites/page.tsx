@@ -123,7 +123,7 @@ export default function FavoritesPage() {
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at top left, rgba(16,185,129,0.08), transparent 55%)' }} />
                   <div className="relative z-10 flex items-center gap-2 mb-3">
                     {bookmark.blog.tags && bookmark.blog.tags.length > 0 ? (
-                      bookmark.blog.tags.slice(0, 2).map((tag) => (
+                      bookmark.blog.tags.slice(0, 2).map((tag: string) => (
                         <Badge key={tag} className="bg-emerald-50 text-emerald-700 border-emerald-100 text-xs font-medium">{tag}</Badge>
                       ))
                     ) : (
