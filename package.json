@@ -60,6 +60,7 @@
     "express": "^5.2.1",
     "framer-motion": "^11.3.28",
     "helmet": "^8.1.0",
+    "highlight.js": "^11.12.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.446.0",
     "monaco-editor": "^0.50.0",

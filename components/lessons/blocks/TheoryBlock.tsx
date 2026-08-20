@@ -14,7 +14,7 @@ export function TheoryBlock({ title, content }: { title: string; content: string
       className="rounded-2xl border border-white/70 bg-white/80 backdrop-blur-xl p-6 shadow-sm"
     >
       <h3 className="text-xl font-semibold text-gray-900 mb-3">{title || 'Theory'}</h3>
-      <div className="space-y-3 text-sm text-gray-600 leading-relaxed [&_pre]:bg-[#0d1117] [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-auto [&_:not(pre)>code]:bg-gray-100 [&_:not(pre)>code]:text-gray-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded [&_pre>code]:bg-transparent [&_pre>code]:text-inherit [&_pre>code]:p-0">
+      <div className="space-y-3 text-sm text-gray-600 leading-relaxed [&_pre]:bg-[#0d1117] [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-auto [&_code]:bg-gray-100 [&_code]:text-gray-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_pre_code]:text-sm">
         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
           {content}
         </ReactMarkdown>
