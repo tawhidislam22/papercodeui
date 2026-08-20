@@ -21,11 +21,11 @@ export default function AdminDashboardPage() {
   }, []);
 
   const cards = [
-    { label: 'Total Users', value: stats?.users ?? 0, icon: Users, color: 'bg-blue-500', iconBg: 'bg-blue-50 text-blue-600', trend: '+12%' },
-    { label: 'Lessons', value: stats?.lessons ?? 0, icon: BookOpen, color: 'bg-emerald-500', iconBg: 'bg-emerald-50 text-emerald-600', trend: '+3' },
-    { label: 'Chapters', value: stats?.chapters ?? 0, icon: Layers, color: 'bg-purple-500', iconBg: 'bg-purple-50 text-purple-600', trend: '+8' },
-    { label: 'Blog Posts', value: stats?.blogs ?? 0, icon: BookMarked, color: 'bg-amber-500', iconBg: 'bg-amber-50 text-amber-600', trend: '+5' },
-    { label: 'Submissions', value: stats?.submissions ?? 0, icon: FileText, color: 'bg-rose-500', iconBg: 'bg-rose-50 text-rose-600', trend: '+24' },
+    { label: 'Total Users', value: stats?.users ?? 0, icon: Users, color: 'bg-blue-500', iconBg: 'bg-blue-50 text-blue-600', trend: '+12%', href: '/admin/users' },
+    { label: 'Lessons', value: stats?.lessons ?? 0, icon: BookOpen, color: 'bg-emerald-500', iconBg: 'bg-emerald-50 text-emerald-600', trend: '+3', href: '/admin/lessons' },
+    { label: 'Chapters', value: stats?.chapters ?? 0, icon: Layers, color: 'bg-purple-500', iconBg: 'bg-purple-50 text-purple-600', trend: '+8', href: '/admin/lessons' },
+    { label: 'Blog Posts', value: stats?.blogs ?? 0, icon: BookMarked, color: 'bg-amber-500', iconBg: 'bg-amber-50 text-amber-600', trend: '+5', href: '/admin/blogs' },
+    { label: 'Submissions', value: stats?.submissions ?? 0, icon: FileText, color: 'bg-rose-500', iconBg: 'bg-rose-50 text-rose-600', trend: '+24', href: '/admin/leaderboard' },
   ];
 
   const topUsers = [...users].sort((a, b) => b.xp - a.xp).slice(0, 5);
@@ -45,20 +45,22 @@ export default function AdminDashboardPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map((card) => (
-          <div key={card.label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center`}>
-                <card.icon className="w-5 h-5" />
+          <Link key={card.label} href={card.href} className="block">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 transition-all h-full cursor-pointer">
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center`}>
+                  <card.icon className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{card.trend}</span>
               </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{card.trend}</span>
+              {loading ? (
+                <div className="h-8 w-16 bg-gray-100 rounded animate-pulse" />
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">{card.label}</p>
             </div>
-            {loading ? (
-              <div className="h-8 w-16 bg-gray-100 rounded animate-pulse" />
-            ) : (
-              <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">{card.label}</p>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -103,19 +105,21 @@ export default function AdminDashboardPage() {
           <div className="divide-y divide-gray-50">
             {loading ? [...Array(5)].map((_, i) => <div key={i} className="px-5 py-3"><div className="h-5 bg-gray-100 rounded animate-pulse" /></div>) :
               topUsers.map((user, i) => (
-                <div key={user.id} className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-100 text-gray-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}>
-                    {i + 1}
+                <Link key={user.id} href="/admin/users" className="block">
+                  <div className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-100 text-gray-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{user.displayName || user.username}</p>
+                      <p className="text-xs text-gray-400">@{user.username}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-blue-600">{user.xp} XP</p>
+                      <p className="text-xs text-gray-400">{user._count.submissions} solved</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{user.displayName || user.username}</p>
-                    <p className="text-xs text-gray-400">@{user.username}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-blue-600">{user.xp} XP</p>
-                    <p className="text-xs text-gray-400">{user._count.submissions} solved</p>
-                  </div>
-                </div>
+                </Link>
               ))
             }
           </div>
@@ -137,15 +141,20 @@ export default function AdminDashboardPage() {
               recentBlogs.length === 0 ? (
                 <div className="px-5 py-8 text-center text-gray-400 text-sm">No blog posts yet</div>
               ) : recentBlogs.map((blog) => (
-                <div key={blog.id} className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
-                    <p className="text-xs text-gray-400">by @{blog.author.username}</p>
+                <Link key={blog.id} href={`/blogs/${blog.id}`} className="block">
+                  <div className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
+                    <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                      <BookMarked className="w-4 h-4 text-gray-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                      <p className="text-xs text-gray-400">by @{blog.author.username}</p>
+                    </div>
+                    <Badge className={`text-xs shrink-0 ${blog.isPublished ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                      {blog.isPublished ? 'Published' : 'Draft'}
+                    </Badge>
                   </div>
-                  <Badge className={`text-xs shrink-0 ${blog.isPublished ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                    {blog.isPublished ? 'Published' : 'Draft'}
-                  </Badge>
-                </div>
+                </Link>
               ))
             }
           </div>
@@ -162,16 +171,18 @@ export default function AdminDashboardPage() {
           <div className="divide-y divide-gray-50">
             {loading ? [...Array(5)].map((_, i) => <div key={i} className="px-5 py-3"><div className="h-5 bg-gray-100 rounded animate-pulse" /></div>) :
               recentUsers.map((user) => (
-                <div key={user.id} className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
-                    {(user.displayName || user.username).charAt(0).toUpperCase()}
+                <Link key={user.id} href="/admin/users" className="block">
+                  <div className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
+                      {(user.displayName || user.username).charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{user.displayName || user.username}</p>
+                      <p className="text-xs text-gray-400">{user.email}</p>
+                    </div>
+                    <Badge className={`text-xs ${user.role === 'ADMIN' ? 'bg-red-50 text-red-700' : 'bg-gray-50 text-gray-500'}`}>{user.role}</Badge>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{user.displayName || user.username}</p>
-                    <p className="text-xs text-gray-400">{user.email}</p>
-                  </div>
-                  <Badge className={`text-xs ${user.role === 'ADMIN' ? 'bg-red-50 text-red-700' : 'bg-gray-50 text-gray-500'}`}>{user.role}</Badge>
-                </div>
+                </Link>
               ))
             }
           </div>
