@@ -12,6 +12,7 @@ import { blogsRouter } from './blogs/blogs.routes.js';
 import { commentsRouter } from './comments/comments.routes.js';
 import { xpRouter } from './xp/xp.routes.js';
 import { adminRouter } from './admin/admin.routes.js';
+import { bookmarksRouter } from './bookmarks/bookmarks.routes.js';
 
 export const apiRouter = Router();
 
@@ -28,3 +29,4 @@ apiRouter.use('/blogs', blogsRouter);
 apiRouter.use('/comments', commentsRouter);
 apiRouter.use('/xp', xpRouter);
 apiRouter.use('/admin', adminRouter);
+apiRouter.use('/bookmarks', bookmarksRouter);

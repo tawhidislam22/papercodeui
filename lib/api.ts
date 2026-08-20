@@ -421,6 +421,35 @@ export const api = {
 				body: JSON.stringify(data),
 			});
 		},
+		update(id: string, data: Partial<Blog>) {
+			return apiFetch(`/blogs/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		delete(id: string) {
+			return apiFetch(`/blogs/${id}`, {
+				method: 'DELETE',
+			});
+		},
+		getMyBlogs() {
+			return apiFetch<Blog[]>('/blogs/me');
+		}
+	},
+	bookmarks: {
+		getAll() {
+			return apiFetch<any[]>('/bookmarks');
+		},
+		toggleBlog(id: string) {
+			return apiFetch<{ bookmarked: boolean }>(`/bookmarks/blogs/${id}`, {
+				method: 'POST',
+			});
+		},
+		toggleLesson(id: string) {
+			return apiFetch<{ bookmarked: boolean }>(`/bookmarks/lessons/${id}`, {
+				method: 'POST',
+			});
+		}
 	},
 	submissions: {
 		create(data: Partial<Submission>) {

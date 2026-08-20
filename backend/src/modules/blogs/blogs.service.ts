@@ -13,4 +13,10 @@ export const blogsService = {
   update(userId: string, id: string, data: Record<string, unknown>) {
     return blogsRepo.update(userId, id, data);
   },
+  delete(userId: string, id: string) {
+    return blogsRepo.delete(userId, id);
+  },
+  listMyBlogs(userId: string) {
+    return blogsRepo.listMyBlogs(userId);
+  }
 };

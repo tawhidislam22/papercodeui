@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
+import { ArrowLeft, BookOpen, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { ChapterRow } from '@/components/lessons/ChapterRow';
 
 export default function LessonDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const [bookmarked, setBookmarked] = useState(false);
 
   const lessonQuery = useQuery({
     queryKey: ['lesson', slug],
@@ -20,11 +22,19 @@ export default function LessonDetailPage() {
 
   const lesson = lessonQuery.data;
 
+  useEffect(() => {
+    api.bookmarks.getAll()
+      .then((bookmarks: any) => {
+        setBookmarked(bookmarks.some((b: any) => b.lesson?.slug === slug));
+      })
+      .catch(() => null);
+  }, [slug]);
+
   const progressSummary = useMemo(() => {
     if (!lesson) return { completed: 0, total: 0, minutes: 0 };
     const total = lesson.chapters.length;
-    const completed = lesson.chapters.filter((chapter) => chapter.progress?.isCompleted).length;
-    const minutes = lesson.chapters.reduce((sum, chapter) => sum + (chapter.estimatedMinutes || 0), 0);
+    const completed = lesson.chapters.filter((chapter: any) => chapter.progress?.isCompleted).length;
+    const minutes = lesson.chapters.reduce((sum: number, chapter: any) => sum + (chapter.estimatedMinutes || 0), 0);
     return { completed, total, minutes };
   }, [lesson]);
 
@@ -72,9 +82,28 @@ export default function LessonDetailPage() {
             <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mt-2">{lesson.title}</h1>
             <p className="text-gray-500 mt-3 max-w-2xl">{lesson.description}</p>
           </div>
-          <Button className="rounded-2xl text-white" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
-            Resume learning <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                const demoUser = getDemoUser();
+                if (!demoUser) return;
+                try {
+                  const res = await api.bookmarks.toggleLesson(lesson.id);
+                  setBookmarked(res.bookmarked);
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className={`rounded-2xl gap-2 ${bookmarked ? 'border-blue-200 bg-blue-50 text-blue-600' : ''}`}
+            >
+              <Heart className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />
+              {bookmarked ? 'Saved' : 'Save'}
+            </Button>
+            <Button className="rounded-2xl text-white" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
+              Resume learning <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
         </div>
       </div>
 

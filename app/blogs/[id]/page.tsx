@@ -25,6 +25,12 @@ export default function BlogPostPage() {
       })
       .catch(() => null)
       .finally(() => setLoading(false));
+
+    api.bookmarks.getAll()
+      .then((bookmarks) => {
+        setBookmarked(bookmarks.some((b: any) => b.blogId === id));
+      })
+      .catch(() => null);
   }, [id]);
 
   if (loading) {
@@ -131,7 +137,16 @@ export default function BlogPostPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setBookmarked(!bookmarked)}
+            onClick={async () => {
+              const demoUser = getDemoUser();
+              if (!demoUser) return;
+              try {
+                const res = await api.bookmarks.toggleBlog(id);
+                setBookmarked(res.bookmarked);
+              } catch (e) {
+                console.error(e);
+              }
+            }}
             className={`gap-2 ${bookmarked ? 'border-blue-200 bg-blue-50 text-blue-600' : ''}`}
           >
             <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />

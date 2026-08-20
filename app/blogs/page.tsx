@@ -59,13 +59,16 @@ export default function BlogsPage() {
           <h1 className="text-3xl font-extrabold text-gray-900">Blog</h1>
           <p className="text-gray-500 mt-1">Learn from the community. Share your journey.</p>
         </div>
-        {userId && (
-          <Link href="/blogs/new">
-            <Button className="text-white gap-2" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
-              <Plus className="w-4 h-4" /> Write a post
-            </Button>
-          </Link>
-        )}
+        <Button 
+          onClick={() => {
+            if (!userId) router.push('/login');
+            else router.push('/blogs/new');
+          }}
+          className="text-white gap-2" 
+          style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}
+        >
+          <Plus className="w-4 h-4" /> Write a post
+        </Button>
       </div>
 
       {/* Search + filter */}
@@ -147,13 +150,16 @@ export default function BlogsPage() {
           <BookMarked className="w-12 h-12 text-gray-200 mx-auto mb-4" />
           <p className="text-gray-500 font-medium">No posts found</p>
           <p className="text-gray-400 text-sm mt-1">Be the first to write about this topic!</p>
-          {userId && (
-            <Link href="/blogs/new" className="mt-4 inline-block">
-              <Button className="text-white" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}>
-                Write a post
-              </Button>
-            </Link>
-          )}
+          <Button 
+            onClick={() => {
+              if (!userId) router.push('/login');
+              else router.push('/blogs/new');
+            }}
+            className="mt-4 text-white" 
+            style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}
+          >
+            Write a post
+          </Button>
         </div>
       )}
     </div>

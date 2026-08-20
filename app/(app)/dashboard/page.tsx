@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [loading, setLoading] = useState(true);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [myBlogs, setMyBlogs] = useState<any[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -37,7 +38,12 @@ export default function DashboardPage() {
 
       if (p) {
         setProfile(p);
-        try { const certs = await adminApi.certificates.listForUser(p.id); setCertificates(certs); } catch { /* ignore */ }
+        try { 
+          const certs = await adminApi.certificates.listForUser(p.id); 
+          setCertificates(certs); 
+          const myB = await api.blogs.getMyBlogs();
+          setMyBlogs(myB);
+        } catch { /* ignore */ }
       }
       if (langs) setLanguages(langs);
       setLoading(false);
@@ -228,6 +234,67 @@ export default function DashboardPage() {
                   >
                     <Download className="w-3 h-3" /> Download
                   </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* My Blogs section */}
+      {myBlogs.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-purple-500" /> My Blogs
+            </h2>
+            <Link href="/blogs/new">
+              <Button size="sm" variant="outline" className="text-purple-600 border-purple-200 hover:bg-purple-50">
+                Write a new post
+              </Button>
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myBlogs.map((blog) => (
+              <div key={blog.id} className="border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-2">
+                  <Badge variant={blog.isPublished ? 'default' : 'secondary'} className={blog.isPublished ? 'bg-emerald-100 text-emerald-700' : ''}>
+                    {blog.isPublished ? 'Published' : 'Draft'}
+                  </Badge>
+                  <p className="text-xs text-gray-400">{new Date(blog.createdAt).toLocaleDateString()}</p>
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2 truncate">{blog.title}</h3>
+                <p className="text-sm text-gray-500 line-clamp-2 mb-4">{blog.excerpt}</p>
+                <div className="flex items-center justify-between gap-2 border-t border-gray-50 pt-4 mt-auto">
+                  <Link href={`/blogs/${blog.id}`} className="text-blue-600 text-xs font-semibold hover:underline">
+                    View
+                  </Link>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={async () => {
+                        await api.blogs.update(blog.id, { isPublished: !blog.isPublished });
+                        setMyBlogs(await api.blogs.getMyBlogs());
+                      }}
+                    >
+                      {blog.isPublished ? 'Unpublish' : 'Publish'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-7 text-xs"
+                      onClick={async () => {
+                        if (confirm('Delete this blog?')) {
+                          await api.blogs.delete(blog.id);
+                          setMyBlogs(await api.blogs.getMyBlogs());
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}

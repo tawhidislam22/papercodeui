@@ -24,3 +24,16 @@ export async function updateBlog(req: Request, res: Response) {
   if (result.count === 0) return res.status(404).json({ error: 'Not found' });
   return res.json({ updated: true });
 }
+
+export async function deleteBlog(req: Request, res: Response) {
+  if (!res.locals.user) return res.status(401).json({ error: 'Unauthorized' });
+  const result = await blogsService.delete(res.locals.user.id, req.params.id);
+  if (result.count === 0) return res.status(404).json({ error: 'Not found' });
+  return res.json({ deleted: true });
+}
+
+export async function listMyBlogs(req: Request, res: Response) {
+  if (!res.locals.user) return res.status(401).json({ error: 'Unauthorized' });
+  const blogs = await blogsService.listMyBlogs(res.locals.user.id);
+  return res.json(blogs);
+}

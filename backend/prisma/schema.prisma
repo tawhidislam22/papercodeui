@@ -113,6 +113,7 @@ model Lesson {
   chapters    Chapter[]
   progress    UserProgress[]
   challenges  Challenge[]
+  bookmarks   Bookmark[]
 }
 
 model Chapter {
@@ -280,14 +281,17 @@ model Comment {
 
 model Bookmark {
   id        String   @id @default(uuid())
-  blogId    String
+  blogId    String?
+  lessonId  String?
   userId    String
   createdAt DateTime @default(now())
 
-  blog      Blog     @relation(fields: [blogId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  lesson    Lesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([blogId, userId])
+  @@unique([lessonId, userId])
 }
 
 model Follow {

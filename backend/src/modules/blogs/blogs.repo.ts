@@ -44,4 +44,15 @@ export const blogsRepo = {
       },
     });
   },
+  delete(userId: string, id: string) {
+    return prisma.blog.deleteMany({
+      where: { id, authorId: userId },
+    });
+  },
+  listMyBlogs(userId: string) {
+    return prisma.blog.findMany({
+      where: { authorId: userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 };
