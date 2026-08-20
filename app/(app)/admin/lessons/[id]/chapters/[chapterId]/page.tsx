@@ -36,6 +36,7 @@ export default function AdminBlocksPage() {
   const [codingLang, setCodingLang] = useState('python');
   const [codingHints, setCodingHints] = useState('');
   const [creating, setCreating] = useState(false);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -44,20 +45,52 @@ export default function AdminBlocksPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function createBlock() {
+  async function handleSaveBlock() {
     if (!newTitle.trim()) return;
     setCreating(true);
     try {
-      const data: Record<string, unknown> = { chapterId, type: newType, title: newTitle.trim(), content: newContent, sortOrder: blocks.length };
+      const data: Record<string, unknown> = { type: newType, title: newTitle.trim(), content: newContent };
+      if (!editingBlockId) {
+        data.chapterId = chapterId;
+        data.sortOrder = blocks.length;
+      }
       if (newType === 'MCQ') data.mcq = { question: mcqQuestion, options: mcqOptions.filter(Boolean), correctIndex: mcqCorrect, explanation: mcqExplanation };
       if (newType === 'CODING') data.coding = { question: codingQuestion, starterCode: codingStarter, expectedOutput: codingExpected, language: codingLang, hints: codingHints.split('\n').filter(Boolean) };
-      await adminApi.blocks.create(data);
+      
+      if (editingBlockId) {
+        await adminApi.blocks.update(editingBlockId, data);
+      } else {
+        await adminApi.blocks.create(data);
+      }
       resetForm();
       load();
     } finally { setCreating(false); }
   }
 
+  function startEdit(block: AdminBlock) {
+    setEditingBlockId(block.id);
+    setNewType(block.type);
+    setNewTitle(block.title || block.type);
+    setNewContent(block.content || '');
+    if (block.type === 'MCQ' && block.mcq) {
+      setMcqQuestion(block.mcq.question);
+      setMcqOptions([...block.mcq.options, '', '', '', ''].slice(0, 4));
+      setMcqCorrect(block.mcq.correctIndex);
+      setMcqExplanation(block.mcq.explanation);
+    }
+    if (block.type === 'CODING' && block.coding) {
+      setCodingQuestion(block.coding.question);
+      setCodingStarter(block.coding.starterCode);
+      setCodingExpected(block.coding.expectedOutput);
+      setCodingLang(block.coding.language);
+      setCodingHints(block.coding.hints.join('\n'));
+    }
+    setShowCreate(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function resetForm() {
+    setEditingBlockId(null);
     setNewTitle(''); setNewContent(''); setMcqQuestion(''); setMcqOptions(['', '', '', '']); setMcqCorrect(0); setMcqExplanation('');
     setCodingQuestion(''); setCodingStarter(''); setCodingExpected(''); setCodingHints(''); setShowCreate(false);
   }
@@ -79,11 +112,11 @@ export default function AdminBlocksPage() {
       </div>
 
       {showCreate && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-gray-900">New Block</h3>
+        <div className="bg-white rounded-2xl border border-blue-200 p-5 mb-6 shadow-sm space-y-4">
+          <h3 className="font-semibold text-gray-900">{editingBlockId ? 'Edit Block' : 'New Block'}</h3>
           <div className="grid sm:grid-cols-2 gap-3">
             <Input placeholder="Block title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="rounded-xl" />
-            <select value={newType} onChange={(e) => setNewType(e.target.value as 'THEORY' | 'MCQ' | 'CODING')} className="rounded-xl border border-gray-200 px-3 py-2 text-sm"><option value="THEORY">Theory</option><option value="MCQ">MCQ</option><option value="CODING">Coding</option></select>
+            <select value={newType} onChange={(e) => setNewType(e.target.value as 'THEORY' | 'MCQ' | 'CODING')} disabled={!!editingBlockId} className="rounded-xl border border-gray-200 px-3 py-2 text-sm disabled:opacity-50 disabled:bg-gray-50"><option value="THEORY">Theory</option><option value="MCQ">MCQ</option><option value="CODING">Coding</option></select>
           </div>
           {newType === 'THEORY' && <textarea placeholder="Content (markdown)" value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={6} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-y" />}
           {newType === 'MCQ' && (
@@ -104,7 +137,10 @@ export default function AdminBlocksPage() {
               <textarea placeholder="Hints (one per line)" value={codingHints} onChange={(e) => setCodingHints(e.target.value)} rows={2} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-y" />
             </div>
           )}
-          <div className="flex gap-2"><Button onClick={createBlock} disabled={creating || !newTitle.trim()} className="rounded-xl">{creating ? 'Creating...' : 'Create Block'}</Button><Button variant="outline" onClick={resetForm} className="rounded-xl">Cancel</Button></div>
+          <div className="flex gap-2">
+            <Button onClick={handleSaveBlock} disabled={creating || !newTitle.trim()} className="rounded-xl">{creating ? 'Saving...' : (editingBlockId ? 'Save Changes' : 'Create Block')}</Button>
+            <Button variant="outline" onClick={resetForm} className="rounded-xl">Cancel</Button>
+          </div>
         </div>
       )}
 
@@ -116,7 +152,7 @@ export default function AdminBlocksPage() {
           const Icon = config.icon;
           const isExpanded = expandedId === block.id;
           return (
-            <div key={block.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div key={block.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:border-blue-200 transition-colors">
               <div className="flex items-center gap-4 p-4">
                 <div className="flex flex-col gap-1">
                   <button onClick={() => moveBlock(index, 'up')} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-20"><ArrowUp className="w-3.5 h-3.5" /></button>
@@ -124,14 +160,15 @@ export default function AdminBlocksPage() {
                   <button onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-20"><ArrowDown className="w-3.5 h-3.5" /></button>
                 </div>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${config.color}`}><Icon className="w-4 h-4" /></div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">{block.title || block.type}</p>
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : block.id)}>
+                  <p className="font-semibold text-gray-900 truncate hover:text-blue-600 transition-colors">{block.title || block.type}</p>
                   <div className="flex items-center gap-2 mt-0.5"><Badge className={`text-xs ${config.color}`}>{config.label}</Badge>
                     {block.type === 'MCQ' && block.mcq && <span className="text-xs text-gray-400">{block.mcq.options.length} options</span>}
                     {block.type === 'CODING' && block.coding && <span className="text-xs text-gray-400">{block.coding.language}</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
+                  <Button size="sm" variant="outline" onClick={() => startEdit(block)} className="text-gray-600 h-8 px-3 rounded-lg text-xs font-medium">Edit</Button>
                   <Button size="sm" variant="outline" onClick={() => setExpandedId(isExpanded ? null : block.id)} className="h-8 w-8 p-0 rounded-lg">{isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}</Button>
                   <Button size="sm" variant="outline" onClick={() => removeBlock(block.id)} className="text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button>
                 </div>
