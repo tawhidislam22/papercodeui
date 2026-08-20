@@ -65,11 +65,7 @@ export default function ChapterLearningPage() {
       api.progress.completeBlock(chapter.id, { lessonId: chapter.lessonId, blockId }).catch(console.error);
     }
 
-    const nextIndex = Math.min(activeIndex + 1, blocks.length - 1);
-    setActiveIndex(nextIndex);
-    setCurrentBlockId(blocks[nextIndex]?.id);
-
-    if (!wasCompleted && nextIndex === blocks.length - 1 && blockId === blocks[blocks.length - 1].id) {
+    if (!wasCompleted && blockId === blocks[blocks.length - 1].id) {
       api.progress.completeChapter(chapter.id, { lessonId: chapter.lessonId }).catch(console.error);
     }
   }
@@ -141,7 +137,17 @@ export default function ChapterLearningPage() {
 
               {activeBlock.type === 'THEORY' && !completedBlockIds.includes(activeBlock.id) && (
                 <div className="mt-4 flex justify-end">
-                  <Button onClick={() => handleCompleteBlock(activeBlock.id)} className="rounded-xl">
+                  <Button 
+                    onClick={() => {
+                      handleCompleteBlock(activeBlock.id);
+                      if (activeIndex < blocks.length - 1) {
+                        const nextIndex = activeIndex + 1;
+                        setActiveIndex(nextIndex);
+                        setCurrentBlockId(blocks[nextIndex]?.id);
+                      }
+                    }} 
+                    className="rounded-xl"
+                  >
                     Continue
                   </Button>
                 </div>

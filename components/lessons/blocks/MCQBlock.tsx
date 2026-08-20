@@ -38,7 +38,10 @@ export function MCQBlock({
           return (
             <button
               key={index}
-              onClick={() => setSelected(index)}
+              onClick={() => {
+                if (!validated) setSelected(index);
+              }}
+              disabled={validated}
               className={`w-full text-left rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
                 showCorrect
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
@@ -47,7 +50,7 @@ export function MCQBlock({
                     : isSelected
                       ? 'border-blue-200 bg-blue-50 text-blue-700'
                       : 'border-gray-100 bg-white text-gray-600 hover:border-blue-100'
-              }`}
+              } ${validated ? 'cursor-default' : 'cursor-pointer'}`}
             >
               <div className="flex items-center justify-between">
                 <span>{option}</span>
@@ -68,6 +71,11 @@ export function MCQBlock({
         <Button
           disabled={selected === null}
           onClick={() => {
+            if (validated && !isCorrect) {
+              setValidated(false);
+              setSelected(null);
+              return;
+            }
             setValidated(true);
             if (selected !== null && selected === question.correctIndex) {
               onCorrect();
