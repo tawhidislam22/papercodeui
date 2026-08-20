@@ -159,6 +159,18 @@ export default function Navbar() {
           <div className="absolute inset-0 bg-black/20" onClick={() => setMobileOpen(false)} />
           <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-lg">
             <div className="p-4 space-y-1">
+              {profile && (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    pathname.startsWith('/dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <LayoutDashboard className="w-5 h-5" />
+                  Dashboard
+                </Link>
+              )}
               {activeNavItems.map((item) => {
                 const active = pathname === item.href;
                 return (
