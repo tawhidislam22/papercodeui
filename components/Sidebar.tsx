@@ -39,7 +39,7 @@ export default function Sidebar() {
 
   async function signOut() {
     clearDemoUser();
-    router.push('/');
+    window.location.href = '/';
   }
 
   const level = profile ? getLevelFromXP(profile.xp) : 1;

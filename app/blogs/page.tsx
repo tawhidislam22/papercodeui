@@ -49,83 +49,7 @@ export default function BlogsPage() {
     return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  // Static placeholder posts for demo when no DB posts
-  const placeholderPosts: Partial<BlogWithAuthor>[] = [
-    {
-      id: 'p1',
-      title: 'Why Writing Code by Hand Actually Works',
-      excerpt: 'Research shows that handwriting activates deeper cognitive processing. Here is the science behind Paper Code and why it helps you learn faster.',
-      tags: ['Learning'],
-      likesCount: 42,
-      commentsCount: 8,
-      readingTime: 5,
-      createdAt: new Date().toISOString(),
-      views: 320,
-      author: { id: 'p1a', username: 'alexj', displayName: 'Alex Johnson', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
-    },
-    {
-      id: 'p2',
-      title: 'Python Lists vs Tuples: When to Use Which',
-      excerpt: 'A comprehensive guide to understanding the difference between Python lists and tuples, with practical examples and performance benchmarks.',
-      tags: ['Python'],
-      likesCount: 28,
-      commentsCount: 5,
-      readingTime: 7,
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      views: 211,
-      author: { id: 'p2a', username: 'pythonjunkie', displayName: 'Sam Chen', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
-    },
-    {
-      id: 'p3',
-      title: 'Understanding Pointers in C — The Visual Way',
-      excerpt: 'Pointers confuse everyone at first. This guide uses memory diagrams and handwritten examples to make them click forever.',
-      tags: ['C'],
-      likesCount: 67,
-      commentsCount: 14,
-      readingTime: 12,
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-      views: 589,
-      author: { id: 'p3a', username: 'clowlevel', displayName: 'Mike P.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
-    },
-    {
-      id: 'p4',
-      title: 'My First 30 Days Learning JavaScript',
-      excerpt: 'I documented everything I learned in my first month with JavaScript. From variables to closures — my honest experience.',
-      tags: ['JavaScript', 'Learning'],
-      likesCount: 35,
-      commentsCount: 22,
-      readingTime: 10,
-      createdAt: new Date(Date.now() - 259200000).toISOString(),
-      views: 445,
-      author: { id: 'p4a', username: 'newdev99', displayName: 'Jordan K.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
-    },
-    {
-      id: 'p5',
-      title: 'Building a Calculator in C++: Step by Step',
-      excerpt: 'A hands-on project tutorial for C++ beginners. We build a command-line calculator from scratch, explaining every concept.',
-      tags: ['C++', 'Projects'],
-      likesCount: 19,
-      commentsCount: 7,
-      readingTime: 15,
-      createdAt: new Date(Date.now() - 345600000).toISOString(),
-      views: 167,
-      author: { id: 'p5a', username: 'cppdev', displayName: 'Lisa T.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
-    },
-    {
-      id: 'p6',
-      title: '10 JavaScript Tips That Will Level Up Your Code',
-      excerpt: 'From destructuring to optional chaining — these 10 modern JavaScript patterns will make your code cleaner and more expressive.',
-      tags: ['JavaScript', 'Tips'],
-      likesCount: 93,
-      commentsCount: 31,
-      readingTime: 8,
-      createdAt: new Date(Date.now() - 432000000).toISOString(),
-      views: 1024,
-      author: { id: 'p6a', username: 'jshero', displayName: 'Ryan B.', avatarUrl: '', xp: 0, streak: 0, longestStreak: 0, role: 'USER' },
-    },
-  ];
-
-  const displayPosts = filtered.length > 0 ? filtered : (loading ? [] : placeholderPosts as BlogWithAuthor[]);
+  const displayPosts = filtered;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -235,3 +159,4 @@ export default function BlogsPage() {
     </div>
   );
 }
+

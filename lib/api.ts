@@ -296,7 +296,14 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 		if (!response.ok) {
 			const text = await response.text();
-			throw new Error(text || `Request failed (${response.status})`);
+			let errorMessage = text || `Request failed (${response.status})`;
+			try {
+				const json = JSON.parse(text);
+				if (json.error) errorMessage = json.error;
+			} catch (e) {
+				// Not JSON, use raw text
+			}
+			throw new Error(errorMessage);
 		}
 
 		return response.json() as Promise<T>;
@@ -426,6 +433,47 @@ export const api = {
 				method: 'POST',
 				body: JSON.stringify(data),
 			});
+		},
+	},
+	admin: {
+		getStats() {
+			return apiFetch<{ users: number; lessons: number; chapters: number; blogs: number; submissions: number }>('/admin/stats');
+		},
+		getUsers() {
+			return apiFetch<any[]>('/admin/users');
+		},
+		updateUser(id: string, data: Partial<Profile>) {
+			return apiFetch<Profile>(`/admin/users/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		deleteUser(id: string) {
+			return apiFetch(`/admin/users/${id}`, { method: 'DELETE' });
+		},
+		getBlogs() {
+			return apiFetch<any[]>('/admin/blogs');
+		},
+		updateBlog(id: string, data: any) {
+			return apiFetch(`/admin/blogs/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		deleteBlog(id: string) {
+			return apiFetch(`/admin/blogs/${id}`, { method: 'DELETE' });
+		},
+		getLessons() {
+			return apiFetch<any[]>('/admin/lessons');
+		},
+		updateLesson(id: string, data: any) {
+			return apiFetch(`/admin/lessons/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		deleteLesson(id: string) {
+			return apiFetch(`/admin/lessons/${id}`, { method: 'DELETE' });
 		},
 	},
 };

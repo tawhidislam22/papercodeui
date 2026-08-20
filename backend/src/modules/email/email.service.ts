@@ -20,18 +20,7 @@ class EmailService {
         });
         console.log('✅ Email service initialized (Real SMTP)');
       } else {
-        // Fallback to Ethereal Email for testing
-        const testAccount = await nodemailer.createTestAccount();
-        this.transporter = nodemailer.createTransport({
-          host: testAccount.smtp.host,
-          port: testAccount.smtp.port,
-          secure: testAccount.smtp.secure,
-          auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
-          },
-        });
-        console.log('✅ Email service initialized (Ethereal SMTP fallback)');
+        console.warn('⚠️ No SMTP credentials found. Skipping email sending in production.');
       }
     } catch (error) {
       console.error('❌ Failed to initialize email service:', error);
@@ -41,8 +30,13 @@ class EmailService {
   async sendOTP(email: string, otp: string) {
     if (!this.transporter) await this.init();
 
+    if (!this.transporter) {
+      console.warn(`[Mock Email] Would have sent OTP ${otp} to ${email}`);
+      return;
+    }
+
     try {
-      const info = await this.transporter!.sendMail({
+      const info = await this.transporter.sendMail({
         from: '"Paper Code" <noreply@papercode.com>',
         to: email,
         subject: 'Verify your Paper Code account',
