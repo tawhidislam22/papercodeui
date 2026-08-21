@@ -126,7 +126,7 @@ export default function NewBlogPage() {
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               placeholder="A brief summary of your post (shown in listing view)..."
-              className="h-20 resize-none"
+              className="h-32 resize-y"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function NewBlogPage() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={`## Introduction\n\nStart writing your post...\n\n## Main Content\n\nYour detailed content goes here.\n\n\`\`\`javascript\nconsole.log('Hello, world!')\n\`\`\``}
-              className="min-h-96 font-mono text-sm resize-none leading-relaxed"
+              className="min-h-[600px] font-mono text-sm resize-y leading-relaxed"
             />
             <p className="text-xs text-gray-400 mt-2">{Math.ceil(content.split(' ').filter(Boolean).length / 200)} min read &bull; {content.length} chars</p>
           </div>
