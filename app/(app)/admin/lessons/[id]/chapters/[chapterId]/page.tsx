@@ -142,13 +142,13 @@ export default function AdminBlocksPage() {
           )}
           {newType === 'CODING' && (
             <div className="space-y-3">
-              <Input placeholder="Challenge question" value={codingQuestion} onChange={(e) => setCodingQuestion(e.target.value)} className="rounded-xl" />
+              <textarea placeholder="Challenge question" value={codingQuestion} onChange={(e) => setCodingQuestion(e.target.value)} rows={4} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-y" />
               <div className="grid sm:grid-cols-2 gap-3">
                 <select value={codingLang} onChange={(e) => setCodingLang(e.target.value)} className="rounded-xl border border-gray-200 px-3 py-2 text-sm"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option><option value="c">C</option><option value="cpp">C++</option><option value="java">Java</option></select>
                 <Input placeholder="Expected output" value={codingExpected} onChange={(e) => setCodingExpected(e.target.value)} className="rounded-xl" />
               </div>
-              <textarea placeholder="Starter code" value={codingStarter} onChange={(e) => setCodingStarter(e.target.value)} rows={4} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono resize-y" />
-              <textarea placeholder="Hints (one per line)" value={codingHints} onChange={(e) => setCodingHints(e.target.value)} rows={2} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-y" />
+              <textarea placeholder="Starter code" value={codingStarter} onChange={(e) => setCodingStarter(e.target.value)} rows={6} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono resize-y" />
+              <textarea placeholder="Hints (one per line)" value={codingHints} onChange={(e) => setCodingHints(e.target.value)} rows={4} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-y" />
             </div>
           )}
           <div className="flex gap-2">
