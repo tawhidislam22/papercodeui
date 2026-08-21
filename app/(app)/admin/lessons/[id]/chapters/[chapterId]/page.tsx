@@ -132,6 +132,31 @@ export default function AdminBlocksPage() {
             <Input placeholder="Block title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="rounded-xl" />
             <select value={newType} onChange={(e) => setNewType(e.target.value as 'THEORY' | 'MCQ' | 'CODING')} disabled={!!editingBlockId} className="rounded-xl border border-gray-200 px-3 py-2 text-sm disabled:opacity-50 disabled:bg-gray-50"><option value="THEORY">Theory</option><option value="MCQ">MCQ</option><option value="CODING">Coding</option></select>
           </div>
+          
+          <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+             <span className="text-xs font-semibold text-gray-500 uppercase">Insert Image:</span>
+             <Input type="file" accept="image/*" className="max-w-xs h-8 text-xs" onChange={async (e) => {
+               const file = e.target.files?.[0];
+               if (!file) return;
+               try {
+                 toast.loading('Uploading...', { id: 'upload' });
+                 const res = await adminApi.upload.image(file);
+                 const mdLink = `\n![Image](${res.url})\n`;
+                 if (newType === 'THEORY') {
+                   setNewContent(prev => prev + mdLink);
+                   toast.success('Image appended to content!', { id: 'upload' });
+                 } else if (newType === 'CODING') {
+                   setCodingQuestion(prev => prev + mdLink);
+                   toast.success('Image appended to question!', { id: 'upload' });
+                 } else {
+                   navigator.clipboard.writeText(mdLink);
+                   toast.success('Image markdown copied to clipboard!', { id: 'upload' });
+                 }
+               } catch {
+                 toast.error('Failed to upload image', { id: 'upload' });
+               }
+             }} />
+          </div>
           {newType === 'THEORY' && <textarea placeholder="Content (markdown)" value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={6} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-y" />}
           {newType === 'MCQ' && (
             <div className="space-y-3">

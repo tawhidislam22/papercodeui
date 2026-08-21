@@ -286,7 +286,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 	const demoHeaders = getDemoHeaders();
 	Object.entries(demoHeaders).forEach(([key, value]) => headers.set(key, value));
 
-	if (options.body && !headers.has('content-type')) {
+	if (options.body && !headers.has('content-type') && !(options.body instanceof FormData)) {
 		headers.set('content-type', 'application/json');
 	}
 
@@ -464,6 +464,16 @@ export const api = {
 		deleteComment(id: string, commentId: string) {
 			return apiFetch(`/blogs/${id}/comments/${commentId}`, {
 				method: 'DELETE',
+			});
+		}
+	},
+	upload: {
+		image(file: File) {
+			const formData = new FormData();
+			formData.append('image', file);
+			return apiFetch<{ url: string }>('/upload', {
+				method: 'POST',
+				body: formData,
 			});
 		}
 	},

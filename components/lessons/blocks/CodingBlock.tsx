@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import { type CodingChallenge } from '@/lib/api';
 import { useCodeExtractor } from '@/hooks/useCodeExtractor';
 import { useCodeExecutor } from '@/hooks/useCodeExecutor';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 
 const LANGUAGE_OPTIONS = ['python', 'javascript', 'typescript', 'c', 'cpp', 'java'] as const;
 
@@ -86,7 +89,11 @@ export function CodingBlock({
       <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
         <div>
           <h3 className="text-xl font-semibold text-gray-900">{title || 'Coding challenge'}</h3>
-          <p className="text-gray-600 mt-2">{challenge.question}</p>
+          <div className="text-gray-600 mt-2 whitespace-pre-wrap leading-relaxed [&_pre]:bg-[#0d1117] [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-auto [&_code]:bg-gray-100 [&_code]:text-gray-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_pre_code]:text-sm">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+              {challenge.question}
+            </ReactMarkdown>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <select

@@ -20,9 +20,11 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(false);
@@ -38,6 +40,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
       setTitle(data.title || '');
       setExcerpt(data.excerpt || '');
       setContent(data.content || '');
+      setCoverImageUrl(data.coverImageUrl || '');
       setTags(data.tags || []);
     }).catch((err: any) => {
       setError('Failed to load blog');
@@ -58,6 +61,21 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
     setTags(tags.filter((t) => t !== tag));
   }
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const res = await api.upload.image(file);
+      setCoverImageUrl(res.url);
+      toast.success('Image uploaded!');
+    } catch (err) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   async function publish(published: boolean) {
     if (!title.trim()) { setError('Title is required'); return; }
     if (!content.trim()) { setError('Content is required'); return; }
@@ -74,6 +92,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
         title: title.trim(),
         excerpt: excerpt.trim() || content.trim().slice(0, 200),
         content: content.trim(),
+        coverImageUrl,
         tags,
         isPublished: published,
         readingTime,
@@ -134,6 +153,15 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
               placeholder="Write an engaging title..."
               className="text-xl font-bold h-14 text-gray-900 border-gray-200"
             />
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Cover Image</Label>
+            <div className="flex items-center gap-4">
+              {coverImageUrl && <img src={coverImageUrl} alt="Cover" className="h-20 w-32 object-cover rounded-lg border border-gray-200" />}
+              <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="max-w-xs" />
+              {uploadingImage && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+            </div>
           </div>
 
           <div>

@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MCQQuestion } from '@/lib/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 
 export function MCQBlock({
   title,
@@ -30,7 +33,11 @@ export function MCQBlock({
       className="rounded-2xl border border-white/70 bg-white/80 backdrop-blur-xl p-6 shadow-sm"
     >
       <h3 className="text-xl font-semibold text-gray-900 mb-2">{title || 'Quick check'}</h3>
-      <p className="text-gray-600 mb-4">{question.question}</p>
+      <div className="text-gray-600 mb-4 whitespace-pre-wrap leading-relaxed [&_pre]:bg-[#0d1117] [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-auto [&_code]:bg-gray-100 [&_code]:text-gray-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_pre_code]:text-sm">
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+          {question.question}
+        </ReactMarkdown>
+      </div>
 
       <div className="space-y-3">
         {question.options.map((option, index) => {

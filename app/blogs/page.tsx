@@ -116,6 +116,11 @@ export default function BlogsPage() {
           {displayPosts.map((post) => (
             <Link key={post.id} href={`/blogs/${post.id}`}>
               <article className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group h-full flex flex-col">
+                {post.coverImageUrl && (
+                  <div className="w-full h-40 mb-4 rounded-xl overflow-hidden shrink-0">
+                    <img src={post.coverImageUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                )}
                 <div className="flex items-center gap-2 mb-3">
                   {post.tags?.slice(0, 2).map((tag) => (
                     <Badge key={tag} className="bg-blue-50 text-blue-700 border-blue-100 text-xs font-medium">{tag}</Badge>

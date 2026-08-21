@@ -19,9 +19,11 @@ export default function NewBlogPage() {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(false);
 
@@ -38,6 +40,21 @@ export default function NewBlogPage() {
 
   function slugify(text: string) {
     return text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 80);
+  }
+  
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const res = await api.upload.image(file);
+      setCoverImageUrl(res.url);
+      toast.success('Image uploaded!');
+    } catch (err) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
   }
 
   async function publish(published: boolean) {
@@ -58,6 +75,7 @@ export default function NewBlogPage() {
         slug,
         excerpt: excerpt.trim() || content.trim().slice(0, 200),
         content: content.trim(),
+        coverImageUrl,
         tags,
         isPublished: published,
         readingTime,
@@ -118,6 +136,15 @@ export default function NewBlogPage() {
               placeholder="Write an engaging title..."
               className="text-xl font-bold h-14 text-gray-900 border-gray-200"
             />
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Cover Image</Label>
+            <div className="flex items-center gap-4">
+              {coverImageUrl && <img src={coverImageUrl} alt="Cover" className="h-20 w-32 object-cover rounded-lg border border-gray-200" />}
+              <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="max-w-xs" />
+              {uploadingImage && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+            </div>
           </div>
 
           <div>

@@ -34,6 +34,7 @@ export const blogsRepo = {
         slug: typeof data.slug === 'string' ? data.slug : `${Date.now()}`,
         excerpt: typeof data.excerpt === 'string' ? data.excerpt : '',
         content,
+        coverImageUrl: typeof data.coverImageUrl === 'string' ? data.coverImageUrl : '',
         tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
         isPublished: Boolean(data.isPublished),
         readingTime,
@@ -45,6 +46,7 @@ export const blogsRepo = {
       title: typeof data.title === 'string' ? data.title : undefined,
       excerpt: typeof data.excerpt === 'string' ? data.excerpt : undefined,
       content: typeof data.content === 'string' ? data.content : undefined,
+      coverImageUrl: typeof data.coverImageUrl === 'string' ? data.coverImageUrl : undefined,
       tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
       isPublished: typeof data.isPublished === 'boolean' ? data.isPublished : undefined,
     };

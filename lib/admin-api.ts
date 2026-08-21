@@ -27,7 +27,7 @@ async function adminFetch<T>(path: string, options: RequestInit = {}): Promise<T
   const headers = new Headers(options.headers || {});
   const dh = getDemoHeaders();
   Object.entries(dh).forEach(([k, v]) => headers.set(k, v));
-  if (options.body && !headers.has('content-type')) {
+  if (options.body && !headers.has('content-type') && !(options.body instanceof FormData)) {
     headers.set('content-type', 'application/json');
   }
 
@@ -48,7 +48,7 @@ async function baseFetch<T>(path: string, options: RequestInit = {}): Promise<T>
   const headers = new Headers(options.headers || {});
   const dh = getDemoHeaders();
   Object.entries(dh).forEach(([k, v]) => headers.set(k, v));
-  if (options.body && !headers.has('content-type')) {
+  if (options.body && !headers.has('content-type') && !(options.body instanceof FormData)) {
     headers.set('content-type', 'application/json');
   }
 
@@ -91,6 +91,7 @@ export type AdminBlog = {
   title: string;
   slug: string;
   excerpt: string;
+  coverImageUrl?: string;
   isPublished: boolean;
   views: number;
   likesCount: number;
@@ -195,9 +196,9 @@ export const adminApi = {
   // Blogs
   blogs: {
     list: () => adminFetch<AdminBlog[]>('/blogs'),
-    create: (data: { title: string; excerpt?: string; content?: string; tags?: string[]; isPublished?: boolean }) =>
+    create: (data: { title: string; excerpt?: string; content?: string; coverImageUrl?: string; tags?: string[]; isPublished?: boolean }) =>
       adminFetch<AdminBlog>('/blogs', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ isPublished: boolean; title: string }>) =>
+    update: (id: string, data: Partial<{ isPublished: boolean; title: string; excerpt: string; content: string; coverImageUrl: string; tags: string[] }>) =>
       adminFetch(`/blogs/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     remove: (id: string) =>
       adminFetch(`/blogs/${id}`, { method: 'DELETE' }),
@@ -235,19 +236,16 @@ export const adminApi = {
       adminFetch(`/chapters/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     remove: (id: string) =>
       adminFetch(`/chapters/${id}`, { method: 'DELETE' }),
-    reorder: (items: { id: string; sortOrder: number }[]) =>
-      adminFetch('/chapters-reorder', { method: 'PATCH', body: JSON.stringify({ items }) }),
+    reorder: (data: { id: string; sortOrder: number }[]) =>
+      adminFetch('/chapters-reorder', { method: 'PATCH', body: JSON.stringify(data) }),
   },
 
   // Blocks
   blocks: {
     list: (chapterId: string) => adminFetch<AdminBlock[]>(`/chapters/${chapterId}/blocks`),
-    create: (data: Record<string, unknown>) =>
-      adminFetch<AdminBlock>('/blocks', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Record<string, unknown>) =>
-      adminFetch(`/blocks/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    remove: (id: string) =>
-      adminFetch(`/blocks/${id}`, { method: 'DELETE' }),
+    create: (data: any) => adminFetch<AdminBlock>('/blocks', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => adminFetch(`/blocks/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id: string) => adminFetch(`/blocks/${id}`, { method: 'DELETE' }),
   },
 
   // Certificates
@@ -276,5 +274,13 @@ export const adminApi = {
       method: 'DELETE',
     }),
   },
+  
+  upload: {
+    image: (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return baseFetch<{ url: string }>('/upload', { method: 'POST', body: formData });
+    }
+  }
 };
 

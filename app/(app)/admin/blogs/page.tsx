@@ -22,8 +22,10 @@ export default function AdminBlogsPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newExcerpt, setNewExcerpt] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [newCoverImageUrl, setNewCoverImageUrl] = useState('');
   const [newTags, setNewTags] = useState('');
   const [newPublish, setNewPublish] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -31,6 +33,21 @@ export default function AdminBlogsPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const res = await adminApi.upload.image(file);
+      setNewCoverImageUrl(res.url);
+      toast.success('Image uploaded');
+    } catch {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  }
 
   async function togglePublish(blog: AdminBlog) {
     try {
@@ -60,11 +77,12 @@ export default function AdminBlogsPage() {
         title: newTitle,
         excerpt: newExcerpt,
         content: newContent,
+        coverImageUrl: newCoverImageUrl,
         tags: newTags.split(',').map((t) => t.trim()),
         isPublished: newPublish,
       });
       setShowCreate(false);
-      setNewTitle(''); setNewExcerpt(''); setNewContent(''); setNewTags('');
+      setNewTitle(''); setNewExcerpt(''); setNewContent(''); setNewCoverImageUrl(''); setNewTags('');
       toast.success('Blog created successfully');
       load();
     } catch (e) {
@@ -98,6 +116,14 @@ export default function AdminBlogsPage() {
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Title</label>
               <Input placeholder="My awesome article..." value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="rounded-xl text-base" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Cover Image</label>
+              <div className="flex items-center gap-4">
+                {newCoverImageUrl && <img src={newCoverImageUrl} alt="Cover" className="h-16 w-24 object-cover rounded-lg border border-gray-200" />}
+                <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="max-w-xs rounded-xl" />
+                {uploadingImage && <span className="text-sm text-blue-500 font-medium">Uploading...</span>}
+              </div>
             </div>
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Excerpt</label>

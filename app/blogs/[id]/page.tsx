@@ -78,6 +78,13 @@ export default function BlogPostPage() {
           ))}
         </div>
 
+        {/* Cover Image */}
+        {blog.coverImageUrl && (
+          <div className="w-full h-64 sm:h-96 rounded-2xl overflow-hidden mb-8 border border-gray-100 shadow-sm">
+            <img src={blog.coverImageUrl} alt={blog.title} className="w-full h-full object-cover" />
+          </div>
+        )}
+
         {/* Title */}
         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-6">
           {blog.title}

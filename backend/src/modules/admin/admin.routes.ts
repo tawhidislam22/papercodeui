@@ -94,12 +94,13 @@ adminRouter.get('/blogs', async (_req, res, next) => {
 
 adminRouter.patch('/blogs/:id', async (req, res, next) => {
   try {
-    const { isPublished, title, excerpt, tags } = req.body;
+    const { isPublished, title, excerpt, tags, coverImageUrl } = req.body;
     const data: Record<string, unknown> = {};
     if (isPublished !== undefined) data.isPublished = isPublished;
     if (title !== undefined) data.title = title;
     if (excerpt !== undefined) data.excerpt = excerpt;
     if (tags !== undefined) data.tags = tags;
+    if (coverImageUrl !== undefined) data.coverImageUrl = coverImageUrl;
 
     const blog = await prisma.blog.update({
       where: { id: req.params.id },
@@ -123,7 +124,7 @@ adminRouter.delete('/blogs/:id', async (req, res, next) => {
 // Create blog as admin
 adminRouter.post('/blogs', async (req, res, next) => {
   try {
-    const { title, excerpt, content, tags, isPublished } = req.body;
+    const { title, excerpt, content, tags, isPublished, coverImageUrl } = req.body;
     const adminUser = res.locals.user;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const readingTime = Math.max(1, Math.ceil((content || '').split(/\s+/).length / 200));
@@ -135,6 +136,7 @@ adminRouter.post('/blogs', async (req, res, next) => {
         slug: `${slug}-${Date.now().toString(36)}`,
         excerpt: excerpt || '',
         content: content || '',
+        coverImageUrl: coverImageUrl || '',
         tags: tags || [],
         isPublished: isPublished ?? false,
         readingTime,

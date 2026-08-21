@@ -14,6 +14,7 @@ import { xpRouter } from './xp/xp.routes.js';
 import { adminRouter } from './admin/admin.routes.js';
 import { bookmarksRouter } from './bookmarks/bookmarks.routes.js';
 import { reviewsRouter } from './reviews/reviews.routes.js';
+import { uploadRouter } from './upload/upload.routes.js';
 
 export const apiRouter = Router();
 
@@ -32,3 +33,4 @@ apiRouter.use('/xp', xpRouter);
 apiRouter.use('/admin', adminRouter);
 apiRouter.use('/bookmarks', bookmarksRouter);
 apiRouter.use('/reviews', reviewsRouter);
+apiRouter.use('/upload', uploadRouter);
