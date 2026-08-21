@@ -62,6 +62,11 @@ export default function MyBlogsPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {myBlogs.map((blog) => (
             <div key={blog.id} className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow flex flex-col">
+              {blog.coverImageUrl && (
+                <div className="w-full h-40 mb-4 rounded-xl overflow-hidden shrink-0">
+                  <img src={blog.coverImageUrl} alt={blog.title} className="w-full h-full object-cover" />
+                </div>
+              )}
               <div className="flex items-center justify-between mb-3">
                 <Badge variant={blog.isPublished ? 'default' : 'secondary'} className={blog.isPublished ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : ''}>
                   {blog.isPublished ? 'Published' : 'Draft'}

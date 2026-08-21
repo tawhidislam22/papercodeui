@@ -124,6 +124,11 @@ export default function FavoritesPage() {
             blogBookmarks.map((bookmark) => (
               <Link key={bookmark.id} href={`/blogs/${bookmark.blog.id}`}>
                 <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all h-full flex flex-col">
+                  {bookmark.blog.coverImageUrl && (
+                    <div className="w-full h-40 mb-4 rounded-xl overflow-hidden shrink-0">
+                      <img src={bookmark.blog.coverImageUrl} alt={bookmark.blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at top left, rgba(16,185,129,0.08), transparent 55%)' }} />
                   <div className="relative z-10 flex items-center gap-2 mb-3">
                     {bookmark.blog.tags && bookmark.blog.tags.length > 0 ? (
