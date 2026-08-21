@@ -217,14 +217,14 @@ export default function AdminBlocksPage() {
                   {block.type === 'THEORY' && <div><p className="text-xs font-semibold text-gray-500 uppercase mb-1">Content</p><pre className="whitespace-pre-wrap text-gray-700 text-xs bg-white rounded-xl p-3 border border-gray-100 max-h-48 overflow-auto">{block.content || '(empty)'}</pre></div>}
                   {block.type === 'MCQ' && block.mcq && (
                     <div className="space-y-2">
-                      <p className="font-medium text-gray-800">{block.mcq.question}</p>
+                      <p className="font-medium text-gray-800 whitespace-pre-wrap">{block.mcq.question}</p>
                       {block.mcq.options.map((opt, i) => (<div key={i} className={`px-3 py-2 rounded-lg text-sm ${i === block.mcq!.correctIndex ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-white border border-gray-100 text-gray-600'}`}>{i === block.mcq!.correctIndex ? '✓ ' : ''}{opt}</div>))}
                       {block.mcq.explanation && <p className="text-xs text-gray-500 italic">Explanation: {block.mcq.explanation}</p>}
                     </div>
                   )}
                   {block.type === 'CODING' && block.coding && (
                     <div className="space-y-2">
-                      <p className="font-medium text-gray-800">{block.coding.question}</p>
+                      <p className="font-medium text-gray-800 whitespace-pre-wrap">{block.coding.question}</p>
                       <div className="grid sm:grid-cols-2 gap-3">
                         <div><p className="text-xs font-semibold text-gray-500 uppercase mb-1">Starter Code</p><pre className="bg-gray-900 text-emerald-300 rounded-xl p-3 text-xs overflow-auto max-h-40 font-mono">{block.coding.starterCode || '(empty)'}</pre></div>
                         <div><p className="text-xs font-semibold text-gray-500 uppercase mb-1">Expected Output</p><pre className="bg-white border border-gray-100 rounded-xl p-3 text-xs overflow-auto max-h-40 font-mono">{block.coding.expectedOutput || '(none)'}</pre></div>
